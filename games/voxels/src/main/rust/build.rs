@@ -25,18 +25,34 @@ fn main() {
     let water_frag = shaders_dir.join("water.frag");
     let water_vert_spv = shaders_dir.join("water.vert.spv");
     let water_frag_spv = shaders_dir.join("water.frag.spv");
-    let post = [("post.vert","post.vert.spv"), ("bright.frag","bright.frag.spv"), ("blur.frag","blur.frag.spv"), ("composite.frag","composite.frag.spv")];
+    let post = [
+        ("post.vert", "post.vert.spv"),
+        ("bright.frag", "bright.frag.spv"),
+        ("blur.frag", "blur.frag.spv"),
+        ("composite.frag", "composite.frag.spv"),
+    ];
     let atlas_bin = shaders_dir.join("atlas.bin");
 
     if !atlas_bin.exists() {
         println!("cargo:warning=atlas.bin missing, creating checker fallback 64x64");
-        let mut atlas = vec![0u8; 64*64*4];
-        for y in 0..64 { for x in 0..64 {
-            let i = (y*64 + x)*4;
-            let checker = ((x/8 + y/8) %2)==0;
-            if checker { atlas[i]=255; atlas[i+1]=0; atlas[i+2]=255; atlas[i+3]=255; }
-            else { atlas[i]=0; atlas[i+1]=0; atlas[i+2]=0; atlas[i+3]=255; }
-        }}
+        let mut atlas = vec![0u8; 64 * 64 * 4];
+        for y in 0..64 {
+            for x in 0..64 {
+                let i = (y * 64 + x) * 4;
+                let checker = ((x / 8 + y / 8) % 2) == 0;
+                if checker {
+                    atlas[i] = 255;
+                    atlas[i + 1] = 0;
+                    atlas[i + 2] = 255;
+                    atlas[i + 3] = 255;
+                } else {
+                    atlas[i] = 0;
+                    atlas[i + 1] = 0;
+                    atlas[i + 2] = 0;
+                    atlas[i + 3] = 255;
+                }
+            }
+        }
         std::fs::write(&atlas_bin, atlas).ok();
     }
 
@@ -53,24 +69,54 @@ fn main() {
         let _ = Command::new(glslc_path).arg("-o").arg(&water_vert_spv).arg(&water_vert).status();
         let _ = Command::new(glslc_path).arg("-o").arg(&water_frag_spv).arg(&water_frag).status();
         for (src, spv) in &post {
-            let _ = Command::new(glslc_path).arg("-o").arg(shaders_dir.join(spv)).arg(shaders_dir.join(src)).status();
+            let _ = Command::new(glslc_path)
+                .arg("-o")
+                .arg(shaders_dir.join(spv))
+                .arg(shaders_dir.join(src))
+                .status();
         }
     }
 
-    if !vert_spv.exists() { std::fs::write(&vert_spv, minimal_vert_spv()).ok(); }
-    if !frag_spv.exists() { std::fs::write(&frag_spv, minimal_frag_spv()).ok(); }
+    if !vert_spv.exists() {
+        std::fs::write(&vert_spv, minimal_vert_spv()).ok();
+    }
+    if !frag_spv.exists() {
+        std::fs::write(&frag_spv, minimal_frag_spv()).ok();
+    }
     // include_bytes! requires these to exist even if glslc is unavailable.
-    if !sky_vert_spv.exists() { std::fs::write(&sky_vert_spv, minimal_vert_spv()).ok(); }
-    if !sky_frag_spv.exists() { std::fs::write(&sky_frag_spv, minimal_frag_spv()).ok(); }
-    if !cloud_frag_spv.exists() { std::fs::write(&cloud_frag_spv, minimal_frag_spv()).ok(); }
-    if !entity_vert_spv.exists() { std::fs::write(&entity_vert_spv, minimal_vert_spv()).ok(); }
-    if !entity_frag_spv.exists() { std::fs::write(&entity_frag_spv, minimal_frag_spv()).ok(); }
-    if !shadow_vert_spv.exists() { std::fs::write(&shadow_vert_spv, minimal_vert_spv()).ok(); }
-    if !water_vert_spv.exists() { std::fs::write(&water_vert_spv, minimal_vert_spv()).ok(); }
-    if !water_frag_spv.exists() { std::fs::write(&water_frag_spv, minimal_frag_spv()).ok(); }
+    if !sky_vert_spv.exists() {
+        std::fs::write(&sky_vert_spv, minimal_vert_spv()).ok();
+    }
+    if !sky_frag_spv.exists() {
+        std::fs::write(&sky_frag_spv, minimal_frag_spv()).ok();
+    }
+    if !cloud_frag_spv.exists() {
+        std::fs::write(&cloud_frag_spv, minimal_frag_spv()).ok();
+    }
+    if !entity_vert_spv.exists() {
+        std::fs::write(&entity_vert_spv, minimal_vert_spv()).ok();
+    }
+    if !entity_frag_spv.exists() {
+        std::fs::write(&entity_frag_spv, minimal_frag_spv()).ok();
+    }
+    if !shadow_vert_spv.exists() {
+        std::fs::write(&shadow_vert_spv, minimal_vert_spv()).ok();
+    }
+    if !water_vert_spv.exists() {
+        std::fs::write(&water_vert_spv, minimal_vert_spv()).ok();
+    }
+    if !water_frag_spv.exists() {
+        std::fs::write(&water_frag_spv, minimal_frag_spv()).ok();
+    }
     for (src, spv) in &post {
         let p = shaders_dir.join(spv);
-        if !p.exists() { std::fs::write(&p, if src.ends_with(".vert") { minimal_vert_spv() } else { minimal_frag_spv() }).ok(); }
+        if !p.exists() {
+            std::fs::write(
+                &p,
+                if src.ends_with(".vert") { minimal_vert_spv() } else { minimal_frag_spv() },
+            )
+            .ok();
+        }
     }
 
     println!("cargo:rerun-if-changed=shaders/block.vert");
@@ -93,8 +139,8 @@ fn main() {
 
 fn find_glslc() -> Option<PathBuf> {
     for c in [
-        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/29.0.14206865/shader-tools/darwin-x86_64/glslc",
-        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/29.0.14206865/shader-tools/linux-x86_64/glslc",
+        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/26.1.10909125/shader-tools/darwin-x86_64/glslc",
+        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/26.1.10909125/shader-tools/linux-x86_64/glslc",
     ] {
         let p = PathBuf::from(c);
         if p.exists() { return Some(p); }
@@ -105,5 +151,15 @@ fn find_glslc() -> Option<PathBuf> {
     None
 }
 
-fn minimal_vert_spv() -> Vec<u8> { vec![0x03,0x02,0x23,0x07, 0x00,0x00,0x01,0x00, 0x0a,0x00,0x08,0x00, 0x28,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, 0x11,0x00,0x02,0x00, 0x01,0x00,0x00,0x00] }
-fn minimal_frag_spv() -> Vec<u8> { vec![0x03,0x02,0x23,0x07, 0x00,0x00,0x01,0x00, 0x0a,0x00,0x08,0x00, 0x1c,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, 0x11,0x00,0x02,0x00, 0x01,0x00,0x00,0x00] }
+fn minimal_vert_spv() -> Vec<u8> {
+    vec![
+        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00, 0x28, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00,
+    ]
+}
+fn minimal_frag_spv() -> Vec<u8> {
+    vec![
+        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00, 0x1c, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00,
+    ]
+}

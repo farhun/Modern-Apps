@@ -29,12 +29,19 @@ import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.ui.odf.OdfDocument
 import com.vayunmathur.office.util.OfficeViewModel
 import androidx.compose.ui.res.stringResource
-import com.vayunmathur.office.R
 
 /** What the shared bottom bar is currently formatting. (Phase 2) */
 sealed interface FormatTarget {
     data object None : FormatTarget
     data class TextRun(val runStart: Int, val runEnd: Int, val selStart: Int, val selEnd: Int) : FormatTarget
+    data class TextTableRun(
+        val block: Int,
+        val row: Int,
+        val col: Int,
+        val selStart: Int,
+        val selEnd: Int,
+    ) : FormatTarget
+
     data class Cell(val sheet: Int, val row: Int, val col: Int) : FormatTarget
     data class Element(val slide: Int, val element: Int) : FormatTarget
 }
@@ -101,23 +108,28 @@ fun OfficeBottomBar(
         Row(
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).navigationBarsPadding().padding(
                 horizontal = 4.dp,
-                vertical = 4.dp),
+                vertical = 4.dp
+            ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             when (document) {
                 is OdfDocument.TextDocument -> TextFormatControls(
                     document,
-                    target as? FormatTarget.TextRun,
+                    target,
                     viewModel,
                     activeTableBlock,
                     activeTableRow,
                     activeTableCol,
-                    actions)
+                    actions
+                )
+
                 is OdfDocument.Spreadsheet -> CellFormatControls(target as? FormatTarget.Cell, viewModel, actions)
                 is OdfDocument.Presentation -> ElementFormatControls(
                     target as? FormatTarget.Element,
                     viewModel,
-                    actions)
+                    actions
+                )
+
                 else -> {}
             }
             InsertControl(caps, actions)
@@ -134,28 +146,28 @@ private fun InsertControl(caps: DocCaps, actions: BottomBarActions) {
         FmtIcon(false, true, { IconAdd() }) { menu = true }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             if (caps.insertImage) DropdownMenuItem(
-                text = { Text(stringResource(R.string.image_1)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.image_1)) },
                 onClick = { menu = false; actions.onInsertImage() })
             if (caps.insertShape) DropdownMenuItem(
-                text = { Text(stringResource(R.string.shape)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.shape)) },
                 trailingIcon = { IconArrowDropDown() },
                 onClick = { shapeMenu = true })
             if (caps.insertChart) DropdownMenuItem(
-                text = { Text(stringResource(R.string.chart_1)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.chart_1)) },
                 onClick = { menu = false; actions.onInsertChart() })
             if (caps.insertTable) DropdownMenuItem(
-                text = { Text(stringResource(R.string.table_1)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.table_1)) },
                 onClick = { menu = false; actions.onInsertTable() })
         }
         DropdownMenu(expanded = shapeMenu, onDismissRequest = { shapeMenu = false }) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.rectangle)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.rectangle)) },
                 onClick = { shapeMenu = false; menu = false; actions.onInsertShape(ShapeKind.RECT) })
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.ellipse)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.ellipse)) },
                 onClick = { shapeMenu = false; menu = false; actions.onInsertShape(ShapeKind.ELLIPSE) })
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.line)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.line)) },
                 onClick = { shapeMenu = false; menu = false; actions.onInsertShape(ShapeKind.LINE) })
         }
     }

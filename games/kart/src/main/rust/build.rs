@@ -25,11 +25,8 @@ fn main() {
     for (src, spv) in &pairs {
         let out = shaders_dir.join(spv);
         if !out.exists() {
-            let bytes = if src.ends_with(".vert") {
-                minimal_vert_spv()
-            } else {
-                minimal_frag_spv()
-            };
+            let bytes =
+                if src.ends_with(".vert") { minimal_vert_spv() } else { minimal_frag_spv() };
             std::fs::write(&out, bytes).ok();
         }
         println!("cargo:rerun-if-changed=shaders/{src}");
@@ -41,28 +38,22 @@ fn main() {
 /// PATH. The Windows path is read from the same SDK the Gradle build uses.
 fn find_glslc() -> Option<PathBuf> {
     let mut candidates: Vec<PathBuf> = Vec::new();
-    let sdk = std::env::var("ANDROID_HOME")
-        .or_else(|_| std::env::var("ANDROID_SDK_ROOT"))
-        .ok();
+    let sdk = std::env::var("ANDROID_HOME").or_else(|_| std::env::var("ANDROID_SDK_ROOT")).ok();
     if let Some(sdk) = sdk {
         for tag in ["windows-x86_64", "linux-x86_64", "darwin-x86_64"] {
             candidates.push(
                 PathBuf::from(&sdk)
                     .join("ndk")
-                    .join("29.0.14206865")
+                    .join("26.1.10909125")
                     .join("shader-tools")
                     .join(tag)
-                    .join(if tag.starts_with("windows") {
-                        "glslc.exe"
-                    } else {
-                        "glslc"
-                    }),
+                    .join(if tag.starts_with("windows") { "glslc.exe" } else { "glslc" }),
             );
         }
     }
     for mac_linux in [
-        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/29.0.14206865/shader-tools/darwin-x86_64/glslc",
-        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/29.0.14206865/shader-tools/linux-x86_64/glslc",
+        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/26.1.10909125/shader-tools/darwin-x86_64/glslc",
+        "/Users/vayun/devmate-android-toolchain/android-sdk/ndk/26.1.10909125/shader-tools/linux-x86_64/glslc",
     ] {
         candidates.push(PathBuf::from(mac_linux));
     }
@@ -72,12 +63,7 @@ fn find_glslc() -> Option<PathBuf> {
         }
     }
     let probe = if cfg!(windows) { "where" } else { "which" };
-    if Command::new(probe)
-        .arg("glslc")
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
-    {
+    if Command::new(probe).arg("glslc").output().map(|o| o.status.success()).unwrap_or(false) {
         return Some(PathBuf::from("glslc"));
     }
     None
@@ -85,16 +71,14 @@ fn find_glslc() -> Option<PathBuf> {
 
 fn minimal_vert_spv() -> Vec<u8> {
     vec![
-        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00,
-        0x28, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00,
-        0x01, 0x00, 0x00, 0x00,
+        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00, 0x28, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00,
     ]
 }
 
 fn minimal_frag_spv() -> Vec<u8> {
     vec![
-        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00,
-        0x1c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00,
-        0x01, 0x00, 0x00, 0x00,
+        0x03, 0x02, 0x23, 0x07, 0x00, 0x00, 0x01, 0x00, 0x0a, 0x00, 0x08, 0x00, 0x1c, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00,
     ]
 }

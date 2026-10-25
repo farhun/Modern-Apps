@@ -1,8 +1,6 @@
-//! Office native engine: document tree CRDT + ODF formula engine, exposed to
-//! Kotlin via JNI. Pure logic lives in the `crdt` and `formula` modules and is
-//! testable with host `cargo test`; the JNI surface lives in `jni_bindings`.
+//! Office native formula engine, exposed to Kotlin via JNI. Pure formula logic
+//! is testable with host `cargo test`; the JNI surface lives in `jni_bindings`.
 
-mod crdt;
 mod formula;
 pub mod numfmt;
 pub mod ooxml_package;
@@ -10,15 +8,9 @@ pub mod ooxml_units;
 pub mod xlsx_strings;
 pub mod xml;
 
-use crdt::DocumentTreeCrdt;
 use formula::Workbook;
 use std::collections::HashMap;
 use std::sync::{Mutex, OnceLock};
-
-fn crdt_registry() -> &'static Mutex<HashMap<i64, DocumentTreeCrdt>> {
-    static REG: OnceLock<Mutex<HashMap<i64, DocumentTreeCrdt>>> = OnceLock::new();
-    REG.get_or_init(|| Mutex::new(HashMap::new()))
-}
 
 fn wb_registry() -> &'static Mutex<HashMap<i64, Workbook>> {
     static REG: OnceLock<Mutex<HashMap<i64, Workbook>>> = OnceLock::new();
@@ -49,187 +41,6 @@ mod jni_bindings {
             Ok(o) => o.into_raw(),
             Err(_) => std::ptr::null_mut(),
         }
-    }
-
-    // --- Document tree CRDT ---
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtNew<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        device: JString<'l>,
-    ) -> jlong {
-        env.with_env(|env| -> jni::errors::Result<jlong> {
-            let dev = match read_string(env, &device) {
-                Some(v) => v,
-                None => return Ok(0),
-            };
-            let h = next_handle();
-            crdt_registry()
-                .lock()
-                .unwrap()
-                .insert(h, DocumentTreeCrdt::new(dev));
-            Ok(h)
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtLoadState<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-        json: JString<'l>,
-    ) {
-        env.with_env(|env| -> jni::errors::Result<()> {
-            let json = match read_string(env, &json) {
-                Some(v) => v,
-                None => return Ok(()),
-            };
-            let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                if let Some(c) = crdt_registry().lock().unwrap().get_mut(&handle) {
-                    c.load_state(&json);
-                }
-            }));
-            Ok(())
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtSerialize<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-    ) -> jstring {
-        env.with_env(|env| -> jni::errors::Result<jstring> {
-            let out = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                crdt_registry()
-                    .lock()
-                    .unwrap()
-                    .get(&handle)
-                    .map(|c| c.serialize())
-            }))
-            .unwrap_or(None);
-            match out {
-                Some(s) => Ok(out_string(env, s)),
-                None => Ok(std::ptr::null_mut()),
-            }
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtApply<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-        ops_json: JString<'l>,
-    ) {
-        env.with_env(|env| -> jni::errors::Result<()> {
-            let ops_json = match read_string(env, &ops_json) {
-                Some(v) => v,
-                None => return Ok(()),
-            };
-            let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                let ops: Vec<crdt::Node> = match serde_json::from_str(&ops_json) {
-                    Ok(v) => v,
-                    Err(_) => return,
-                };
-                if let Some(c) = crdt_registry().lock().unwrap().get_mut(&handle) {
-                    c.apply(&ops);
-                }
-            }));
-            Ok(())
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtUpdate<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-        xml: JString<'l>,
-    ) -> jstring {
-        env.with_env(|env| -> jni::errors::Result<jstring> {
-            let xml = match read_string(env, &xml) {
-                Some(v) => v,
-                None => return Ok(std::ptr::null_mut()),
-            };
-            let out = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                crdt_registry().lock().unwrap().get_mut(&handle).map(|c| {
-                    let ops = c.update(&xml);
-                    serde_json::to_string(&ops).unwrap_or_else(|_| "[]".to_string())
-                })
-            }))
-            .unwrap_or(None);
-            match out {
-                Some(s) => Ok(out_string(env, s)),
-                None => Ok(std::ptr::null_mut()),
-            }
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtRender<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-    ) -> jstring {
-        env.with_env(|env| -> jni::errors::Result<jstring> {
-            let out = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                crdt_registry()
-                    .lock()
-                    .unwrap()
-                    .get(&handle)
-                    .map(|c| c.render())
-            }))
-            .unwrap_or(None);
-            match out {
-                Some(s) => Ok(out_string(env, s)),
-                None => Ok(std::ptr::null_mut()),
-            }
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtToStateNodesJson<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-    ) -> jstring {
-        env.with_env(|env| -> jni::errors::Result<jstring> {
-            let out = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                crdt_registry()
-                    .lock()
-                    .unwrap()
-                    .get(&handle)
-                    .map(|c| c.to_state_nodes_json())
-            }))
-            .unwrap_or(None);
-            match out {
-                Some(s) => Ok(out_string(env, s)),
-                None => Ok(std::ptr::null_mut()),
-            }
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
-    }
-
-    #[no_mangle]
-    pub extern "system" fn Java_com_vayunmathur_office_util_OfficeNative_crdtFree<'l>(
-        mut env: EnvUnowned<'l>,
-        _class: JClass<'l>,
-        handle: jlong,
-    ) {
-        env.with_env(|env| -> jni::errors::Result<()> {
-            let _ = env;
-            crdt_registry().lock().unwrap().remove(&handle);
-            Ok(())
-        })
-        .resolve::<jni::errors::LogErrorAndDefault>()
     }
 
     // --- ODF formula engine ---

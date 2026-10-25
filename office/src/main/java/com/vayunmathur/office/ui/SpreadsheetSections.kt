@@ -28,7 +28,6 @@ import com.vayunmathur.library.ui.TextButton
 import com.vayunmathur.library.ui.TextField
 import com.vayunmathur.library.ui.TextFieldDefaults
 import com.vayunmathur.library.ui.odf.OdfDocument
-import com.vayunmathur.office.R
 import com.vayunmathur.office.odf.ExcelFormula
 
 /** Cell edit bar above the grid: address label, formula field, done. State lives in [SpreadsheetView]. */
@@ -99,17 +98,17 @@ internal fun SpreadsheetEditToolbar(
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        TextButton(onClick = { val ri = editingCell?.second ?: (doc.sheets[selectedSheet].rows.size - 1); onAddRow(selectedSheet, ri) }) { Text(stringResource(R.string.row_1)) }
-        TextButton(onClick = { onAddColumn(selectedSheet) }) { Text(stringResource(R.string.col_1)) }
+        TextButton(onClick = { val ri = editingCell?.second ?: (doc.sheets[selectedSheet].rows.size - 1); onAddRow(selectedSheet, ri) }) { Text(stringResource(io.github.farhun.office.R.string.row_1)) }
+        TextButton(onClick = { onAddColumn(selectedSheet) }) { Text(stringResource(io.github.farhun.office.R.string.col_1)) }
         if (editingCell != null) {
             TextButton(onClick = { onDeleteRow(
                 selectedSheet,
-                editingCell.second); onEditingCleared() }) { Text(stringResource(R.string.row)) }
+                editingCell.second); onEditingCleared() }) { Text(stringResource(io.github.farhun.office.R.string.row)) }
             TextButton(onClick = { onDeleteColumn(
                 selectedSheet,
-                editingCell.third); onEditingCleared() }) { Text(stringResource(R.string.col)) }
+                editingCell.third); onEditingCleared() }) { Text(stringResource(io.github.farhun.office.R.string.col)) }
         }
-        TextButton(onClick = onShowSort) { Text(stringResource(R.string.sort)) }
+        TextButton(onClick = onShowSort) { Text(stringResource(io.github.farhun.office.R.string.sort)) }
         run {
             val sheet0 = doc.sheets[selectedSheet]
             val frozen = sheet0.freezeRows > 0 || sheet0.freezeCols > 0
@@ -117,18 +116,18 @@ internal fun SpreadsheetEditToolbar(
                 TextButton(onClick = { onSetFreeze(
                     selectedSheet,
                     0,
-                    0) }) { Text(stringResource(R.string.unfreeze)) }
+                    0) }) { Text(stringResource(io.github.farhun.office.R.string.unfreeze)) }
             } else {
                 TextButton(onClick = {
                     // Freeze rows above and columns left of the active/editing cell (default: header row).
                     val r = editingCell?.second ?: 1
                     val c = editingCell?.third ?: 0
                     onSetFreeze(selectedSheet, r, c)
-                }) { Text(stringResource(R.string.freeze)) }
+                }) { Text(stringResource(io.github.farhun.office.R.string.freeze)) }
             }
         }
         Spacer(Modifier.weight(1f))
-        if (doc.sheets.size > 1) TextButton(onClick = onDeleteSheetClick) { Text(stringResource(R.string.sheet_1), color = MaterialTheme.colorScheme.error) }
+        if (doc.sheets.size > 1) TextButton(onClick = onDeleteSheetClick) { Text(stringResource(io.github.farhun.office.R.string.sheet_1), color = MaterialTheme.colorScheme.error) }
     }
 }
 
@@ -147,7 +146,7 @@ internal fun SpreadsheetDialogs(
     onSortDismiss: () -> Unit,
 ) {
     if (showRenameSheet) {
-        AlertDialog(onDismissRequest = onRenameDismiss, title = { Text(stringResource(R.string.rename_sheet)) },
+        AlertDialog(onDismissRequest = onRenameDismiss, title = { Text(stringResource(io.github.farhun.office.R.string.rename_sheet)) },
             text = { TextField(value = renameText, onValueChange = onRenameTextChange, singleLine = true) },
             confirmButton = { TextButton(onClick = { onRenameConfirm(renameText) }) { Text(stringResource(UiR.string.ok)) } },
             dismissButton =

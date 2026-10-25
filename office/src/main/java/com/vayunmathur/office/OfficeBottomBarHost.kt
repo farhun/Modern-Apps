@@ -38,11 +38,14 @@ internal fun DocumentBottomBarHost(
     if (!canEdit) return
     val formatTarget = resolveFormatTarget(
         isTextDoc, isSpreadsheet, isPresentation,
-        activeRunStart, activeRunEnd, selStart, selEnd, activeCell, activeSlide, activeSlideEl)
+        activeRunStart, activeRunEnd, selStart, selEnd, activeCell, activeSlide, activeSlideEl,
+        activeTableBlock, activeTableRow, activeTableCol
+    )
     val caps = resolveDocCaps(isTextDoc, isPresentation, isSpreadsheet)
     val actions = rememberBottomBarActions(
         s, viewModel, launchers, isPresentation, isSpreadsheet,
-        activeSlide, activeCell, activeSlideEl)
+        activeSlide, activeCell, activeSlideEl
+    )
     OfficeBottomBar(
         document,
         formatTarget,
@@ -51,7 +54,8 @@ internal fun DocumentBottomBarHost(
         actions,
         activeTableBlock,
         activeTableRow,
-        activeTableCol)
+        activeTableCol
+    )
 }
 
 /** Format target from the active selection. */
@@ -66,15 +70,24 @@ private fun resolveFormatTarget(
     activeCell: Triple<Int, Int, Int>?,
     activeSlide: Int,
     activeSlideEl: Int,
+    activeTableBlock: Int,
+    activeTableRow: Int,
+    activeTableCol: Int,
 ): FormatTarget = when {
+    isTextDoc && activeTableBlock >= 0 && activeTableRow >= 0 && activeTableCol >= 0 ->
+        FormatTarget.TextTableRun(activeTableBlock, activeTableRow, activeTableCol, selStart, selEnd)
+
     isTextDoc && activeRunStart >= 0 -> FormatTarget.TextRun(
         activeRunStart,
         activeRunEnd,
         selStart,
-        selEnd)
+        selEnd
+    )
+
     isSpreadsheet && (activeCell?.second ?: -1) >= 0 -> activeCell?.let {
         FormatTarget.Cell(it.first, it.second, it.third)
     } ?: FormatTarget.None
+
     isPresentation && activeSlideEl >= 0 -> FormatTarget.Element(activeSlide, activeSlideEl)
     else -> FormatTarget.None
 }

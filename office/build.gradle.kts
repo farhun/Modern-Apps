@@ -10,8 +10,10 @@ launcherIcon {
 }
 
 android {
+    namespace = "io.github.farhun.office"
+
     defaultConfig {
-        applicationId = "com.vayunmathur.office"
+        applicationId = "io.github.farhun.office"
     }
 }
 
@@ -27,8 +29,8 @@ androidComponents {
 rustNativeLib("office_engine", "office")
 
 dependencies {
-    implementation(project(":library:network"))
-    implementation(project(":library:e2ee-p2p"))
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    runtimeOnly("io.github.michaldvorak-gemalto:jp2-android:1.0.4")
 
     // Provides a real XmlPullParser implementation for JVM unit tests (Android's is a stub).
     testImplementation(libs.kxml2)

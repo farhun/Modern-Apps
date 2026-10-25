@@ -44,13 +44,13 @@ fun OfficeOutlinePane(
 ) {
     Column(modifier) {
         Text(
-            stringResource(R.string.outline),
+            stringResource(io.github.farhun.office.R.string.outline),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(panePadding))
         HorizontalDivider()
         if (bookmarks.isNotEmpty()) {
             Text(
-                stringResource(R.string.bookmarks),
+                stringResource(io.github.farhun.office.R.string.bookmarks),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(panePadding, paneHalfPadding))
             LazyColumn(modifier = Modifier.height(outlineListHeight)) {

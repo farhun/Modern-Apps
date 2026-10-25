@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.ui.odf.ChartType
 import com.vayunmathur.library.ui.odf.OdfChart
 import com.vayunmathur.library.ui.odf.OdfChartSeries
-import com.vayunmathur.office.R
 
 @Composable
 fun ChartEditorDialog(initial: OdfChart?, onConfirm: (OdfChart) -> Unit, onDismiss: () -> Unit) {
@@ -44,11 +43,11 @@ fun ChartEditorDialog(initial: OdfChart?, onConfirm: (OdfChart) -> Unit, onDismi
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (initial == null) stringResource(R.string.insert_chart) else stringResource(R.string.edit_chart)) },
+        title = { Text(if (initial == null) stringResource(io.github.farhun.office.R.string.insert_chart) else stringResource(io.github.farhun.office.R.string.edit_chart)) },
         text = {
             Column {
                 Row(Modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.type), modifier = Modifier.padding(end = 4.dp))
+                    Text(stringResource(io.github.farhun.office.R.string.type), modifier = Modifier.padding(end = 4.dp))
                     for (t in ChartType.entries) {
                         TextButton(onClick = { type = t }) {
                             Text(t.name.lowercase().replaceFirstChar { it.uppercase() }, color = if (type == t) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
@@ -58,13 +57,13 @@ fun ChartEditorDialog(initial: OdfChart?, onConfirm: (OdfChart) -> Unit, onDismi
                 TextField(
                     value = categories,
                     onValueChange = { categories = it },
-                    label = { Text(stringResource(R.string.categories_comma_separated)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.categories_comma_separated)) },
                     modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
                 TextField(
                     value = seriesText,
                     onValueChange = { seriesText = it },
-                    label = { Text(stringResource(R.string.series_name_v1_v2)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.series_name_v1_v2)) },
                     modifier = Modifier.fillMaxWidth())
             }
         },

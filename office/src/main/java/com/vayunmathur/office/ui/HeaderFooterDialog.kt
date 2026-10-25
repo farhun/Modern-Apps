@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun HeaderFooterDialog(
@@ -27,19 +26,19 @@ fun HeaderFooterDialog(
     onDismiss: () -> Unit) {
     var header by remember { mutableStateOf(initialHeader) }
     var footer by remember { mutableStateOf(initialFooter) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.header_footer_1)) },
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(io.github.farhun.office.R.string.header_footer_1)) },
         text = {
             Column {
                 TextField(
                     value = header,
                     onValueChange = { header = it },
-                    label = { Text(stringResource(R.string.header)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.header)) },
                     modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
                 TextField(
                     value = footer,
                     onValueChange = { footer = it },
-                    label = { Text(stringResource(R.string.footer)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.footer)) },
                     modifier = Modifier.fillMaxWidth())
             }
         },

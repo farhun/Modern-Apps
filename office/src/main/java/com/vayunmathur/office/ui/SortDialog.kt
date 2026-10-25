@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun SortDialog(maxCols: Int, onSort: (colIndex: Int, ascending: Boolean) -> Unit, onDismiss: () -> Unit) {
@@ -26,13 +25,13 @@ fun SortDialog(maxCols: Int, onSort: (colIndex: Int, ascending: Boolean) -> Unit
     var ascending by remember { mutableStateOf(true) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.sort_rows)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.sort_rows)) },
         text = {
             Column {
                 TextField(value = col, onValueChange = { col = it },
-                    label = { Text(stringResource(R.string.column_index_0, maxCols - 1)) }, singleLine = true)
+                    label = { Text(stringResource(io.github.farhun.office.R.string.column_index_0, maxCols - 1)) }, singleLine = true)
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
-                    Text(stringResource(R.string.order), modifier = Modifier.weight(1f))
+                    Text(stringResource(io.github.farhun.office.R.string.order), modifier = Modifier.weight(1f))
                     TextButton(onClick = { ascending = !ascending }) {
                         Text(if (ascending) "A→Z ↑" else "Z→A ↓")
                     }
@@ -43,7 +42,7 @@ fun SortDialog(maxCols: Int, onSort: (colIndex: Int, ascending: Boolean) -> Unit
             TextButton(onClick = {
                 val c = col.toIntOrNull()?.coerceIn(0, maxCols - 1) ?: 0
                 onSort(c, ascending); onDismiss()
-            }) { Text(stringResource(R.string.sort)) }
+            }) { Text(stringResource(io.github.farhun.office.R.string.sort)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.cancel)) } }
     )

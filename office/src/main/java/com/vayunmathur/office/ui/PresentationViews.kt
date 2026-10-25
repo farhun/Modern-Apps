@@ -54,7 +54,6 @@ import com.vayunmathur.library.ui.TextFieldDefaults
 import com.vayunmathur.library.ui.odf.OdfDocument
 import com.vayunmathur.library.ui.odf.OdfSlide
 import com.vayunmathur.library.ui.odf.OdfSlideElement
-import com.vayunmathur.office.R
 
 @Composable
 fun PresentationView(
@@ -75,7 +74,7 @@ fun PresentationView(
     onCropImage: (Int, Int) -> Unit = { _, _ -> }
 ) {
     if (doc.slides.isEmpty()) { Text(
-        stringResource(R.string.empty_presentation),
+        stringResource(io.github.farhun.office.R.string.empty_presentation),
         modifier = Modifier.padding(16.dp)); return }
 
     var currentSlide by remember { mutableIntStateOf(0) }
@@ -121,9 +120,9 @@ fun PresentationView(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = { onAddSlide(currentSlide) }) { Text(stringResource(R.string.slide_1)) }
-                TextButton(onClick = { onAddTextBox(currentSlide) }) { Text(stringResource(R.string.text)) }
-                TextButton(onClick = { onDuplicateSlide(currentSlide) }) { Text(stringResource(R.string.dup)) }
+                TextButton(onClick = { onAddSlide(currentSlide) }) { Text(stringResource(io.github.farhun.office.R.string.slide_1)) }
+                TextButton(onClick = { onAddTextBox(currentSlide) }) { Text(stringResource(io.github.farhun.office.R.string.text)) }
+                TextButton(onClick = { onDuplicateSlide(currentSlide) }) { Text(stringResource(io.github.farhun.office.R.string.dup)) }
                 TextButton(onClick = { onMoveSlideUp(currentSlide); if (currentSlide > 0) currentSlide-- }) { Text("↑") }
                 TextButton(onClick = { onMoveSlideDown(currentSlide); if (currentSlide < doc.slides.size - 1) currentSlide++ }) { Text("↓") }
                 if (doc.slides.size > 1) TextButton(onClick = { onDeleteSlide(currentSlide); currentSlide = minOf(
@@ -152,11 +151,11 @@ fun PresentationView(
                 horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(
                     onClick = { if (currentSlide > 0) currentSlide-- },
-                    enabled = currentSlide > 0) { Text(stringResource(R.string.prev)) }
+                    enabled = currentSlide > 0) { Text(stringResource(io.github.farhun.office.R.string.prev)) }
                 TextButton(onClick = { showSlideshow = true }) { Text(stringResource(UiR.string.play)) }
                 TextButton(onClick = { showGoToSlide = true }) {
                     Text(
-                        stringResource(R.string.slide_of, currentSlide + 1, doc.slides.size),
+                        stringResource(io.github.farhun.office.R.string.slide_of, currentSlide + 1, doc.slides.size),
                         style = MaterialTheme.typography.titleSmall)
                 }
                 TextButton(
@@ -208,7 +207,7 @@ private fun SlideshowDialog(
             TextButton(
                 onClick = { onSlideChange(index); onDismiss() },
                 modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
-            { Text(stringResource(R.string.close_search), color = Color.White) }
+            { Text(stringResource(io.github.farhun.office.R.string.close_search), color = Color.White) }
         }
     }
 }
@@ -298,7 +297,7 @@ internal fun SlideCard(
             TextButton(
                 onClick = { expanded = !expanded },
                 modifier = Modifier.padding(start = 8.dp))
-            { Text(if (expanded) stringResource(R.string.hide_notes) else stringResource(R.string.speaker_notes)) }
+            { Text(if (expanded) stringResource(io.github.farhun.office.R.string.hide_notes) else stringResource(io.github.farhun.office.R.string.speaker_notes)) }
             if (expanded) Column(modifier = Modifier.padding(
                 horizontal = 16.dp,
                 vertical = 4.dp)) { for (note in slide.notes) ParagraphView(note) }

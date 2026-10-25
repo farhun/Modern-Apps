@@ -91,7 +91,7 @@ private fun SearchField(s: DocumentScreenState, isTextDoc: Boolean) {
     TextField(
         value = s.searchQuery,
         onValueChange = { s.searchQuery = it },
-        placeholder = { Text(stringResource(R.string.search_hint)) },
+        placeholder = { Text(stringResource(io.github.farhun.office.R.string.search_hint)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         colors = TextFieldDefaults.colors(
@@ -102,9 +102,9 @@ private fun SearchField(s: DocumentScreenState, isTextDoc: Boolean) {
                 if (isTextDoc) TextButton(onClick = { s.showReplaceBar = !s.showReplaceBar }) {
                     Text(
                         if (s.showReplaceBar) {
-                            stringResource(R.string.hide)
+                            stringResource(io.github.farhun.office.R.string.hide)
                         } else {
-                            stringResource(R.string.replace_1)
+                            stringResource(io.github.farhun.office.R.string.replace_1)
                         },
                     )
                 }
@@ -137,7 +137,7 @@ private fun MatchNavigator(
             s.wholeWord,
             document) { viewModel.findMatchBlocks(s.searchQuery, s.matchCase, s.wholeWord).size }
         TextButton(onClick = { jumpMatch(s, document, viewModel, scope, listState, -1) }) {
-            Text(stringResource(R.string.prev))
+            Text(stringResource(io.github.farhun.office.R.string.prev))
         }
         TextButton(onClick = { jumpMatch(s, document, viewModel, scope, listState, 1) }) {
             Text(stringResource(UiR.string.next))
@@ -176,7 +176,7 @@ private fun ReplaceBar(s: DocumentScreenState, viewModel: OfficeViewModel) {
                 TextField(
                     value = s.replaceText,
                     onValueChange = { s.replaceText = it },
-                    placeholder = { Text(stringResource(R.string.replace_hint)) },
+                    placeholder = { Text(stringResource(io.github.farhun.office.R.string.replace_hint)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     colors = TextFieldDefaults.colors(
@@ -187,7 +187,7 @@ private fun ReplaceBar(s: DocumentScreenState, viewModel: OfficeViewModel) {
                     s.replaceText,
                     false,
                     s.matchCase,
-                    s.wholeWord) }) { Text(stringResource(R.string.one)) }
+                    s.wholeWord) }) { Text(stringResource(io.github.farhun.office.R.string.one)) }
                 TextButton(onClick = { replaceAll(s, viewModel) }) { Text(stringResource(UiR.string.all)) }
             }
             MatchOptionsRow(s)
@@ -215,18 +215,18 @@ private fun MatchOptionsRow(s: DocumentScreenState) {
         TextButton(onClick = { s.matchCase = !s.matchCase }) {
             Text(
                 if (s.matchCase) {
-                    stringResource(R.string.case_on)
+                    stringResource(io.github.farhun.office.R.string.case_on)
                 } else {
-                    stringResource(R.string.case_1)
+                    stringResource(io.github.farhun.office.R.string.case_1)
                 },
             )
         }
         TextButton(onClick = { s.wholeWord = !s.wholeWord }) {
             Text(
                 if (s.wholeWord) {
-                    stringResource(R.string.word)
+                    stringResource(io.github.farhun.office.R.string.word)
                 } else {
-                    stringResource(R.string.word_1)
+                    stringResource(io.github.farhun.office.R.string.word_1)
                 },
             )
         }
@@ -264,7 +264,7 @@ private fun WordCountBar(
 ) {
     ExpandVisibility(visible = s.showWordBar && isTextDoc) {
         Surface(color = MaterialTheme.colorScheme.surfaceVariant) {
-            Text(stringResource(R.string.words_characters_min_read, wordCount, charCount, readingTime),
+            Text(stringResource(io.github.farhun.office.R.string.words_characters_min_read, wordCount, charCount, readingTime),
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp))
         }

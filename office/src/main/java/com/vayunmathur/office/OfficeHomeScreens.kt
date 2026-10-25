@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.pager.rememberPagerState
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,13 +18,12 @@ import androidx.compose.ui.unit.dp
 import com.vayunmathur.library.ui.AppScaffold
 import com.vayunmathur.library.ui.Button
 import com.vayunmathur.library.ui.ExperimentalMaterial3Api
-import com.vayunmathur.library.ui.IconDownload
-import com.vayunmathur.library.ui.IconHome
+
+
 import com.vayunmathur.library.ui.MaterialTheme
 import com.vayunmathur.library.ui.OutlinedButton
-import com.vayunmathur.library.ui.PagerTab
-import com.vayunmathur.library.ui.TabStyle
-import com.vayunmathur.library.ui.TabbedPagerScaffold
+
+
 import com.vayunmathur.library.ui.Text
 import com.vayunmathur.library.ui.appBarScrollBehavior
 import com.vayunmathur.office.util.OfficeViewModel
@@ -32,32 +31,6 @@ import com.vayunmathur.office.util.createNewPresentation
 import com.vayunmathur.office.util.createNewSpreadsheet
 import com.vayunmathur.office.util.createNewTextDocument
 
-/**
- * The two bottom-nav tabs, hosted in a swipeable pager (see [TabbedPagerScaffold]).
- * OfflineEditor and OnlineEditor are pushed on top of this host as ordinary routes.
- */
-@Composable
-internal fun OfficeTabs(
-    viewModel: OfficeViewModel,
-    onOpenDocument: () -> Unit,
-    onNavigateEditor: () -> Unit,
-    onOpenOnlineDoc: (com.vayunmathur.office.util.OfficeDocMeta) -> Unit,
-) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val tabs = listOf(
-        PagerTab("Offline", { IconHome() }) {
-            InitialScreen(
-                viewModel = viewModel,
-                onOpenDocument = onOpenDocument,
-                onNavigateEditor = onNavigateEditor
-            )
-        },
-        PagerTab("Online", { IconDownload() }) {
-            OnlineTab(viewModel = viewModel, onOpenDoc = onOpenOnlineDoc)
-        },
-    )
-    TabbedPagerScaffold(tabs = tabs, pagerState = pagerState, tabStyle = TabStyle.BottomNav)
-}
 
 @Composable
 fun InitialScreen(viewModel: OfficeViewModel, onOpenDocument: () -> Unit, onNavigateEditor: () -> Unit) {
@@ -87,38 +60,46 @@ fun HomeScreen(
     onNewSpreadsheet: () -> Unit = {},
     onNewPresentation: () -> Unit = {},
 ) {
-    AppScaffold(title = stringResource(R.string.app_name), scrollBehavior = appBarScrollBehavior()) { pad ->
+    AppScaffold(title = stringResource(io.github.farhun.office.R.string.app_name), scrollBehavior = appBarScrollBehavior()) { pad ->
         Column(
             Modifier.fillMaxSize().padding(pad).background(MaterialTheme.colorScheme.background)
                 .padding(homeScreenPadding),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Spacer(Modifier.height(homeScreenPadding))
             Text(
-                stringResource(R.string.open_document_format_viewer_editor),
+                stringResource(io.github.farhun.office.R.string.open_document_format_viewer_editor),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(Modifier.height(homeSectionGap))
 
             Button(
                 onClick = onOpenDocument,
-                modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.open_document)) }
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(io.github.farhun.office.R.string.open_document)) }
             Spacer(Modifier.height(homeTinyGap))
-            Text(stringResource(R.string.opens_odf_word_excel_powerpoint_csv_tsv),
+            Text(
+                stringResource(io.github.farhun.office.R.string.opens_odf_word_excel_powerpoint_csv_tsv),
                 style =
                     MaterialTheme.typography.bodySmall, color =
-                        MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center
+            )
             Spacer(Modifier.height(homeItemGap))
 
             Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(homeSmallGap)) {
                 OutlinedButton(
                     onClick = onNewTextDocument,
-                    modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.new_doc)) }
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text(stringResource(io.github.farhun.office.R.string.new_doc)) }
                 OutlinedButton(
                     onClick = onNewSpreadsheet,
-                    modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.new_sheet)) }
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text(stringResource(io.github.farhun.office.R.string.new_sheet)) }
                 OutlinedButton(
                     onClick = onNewPresentation,
-                    modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.new_slides)) }
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text(stringResource(io.github.farhun.office.R.string.new_slides)) }
             }
         }
     }

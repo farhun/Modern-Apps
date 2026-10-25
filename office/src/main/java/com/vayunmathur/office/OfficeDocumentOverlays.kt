@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -55,11 +55,7 @@ import com.vayunmathur.office.util.acceptChange
 import com.vayunmathur.office.util.addBookmark
 import com.vayunmathur.office.util.applyRunSpanStyle
 import com.vayunmathur.office.util.cellCommentText
-import com.vayunmathur.office.util.currentDocRole
-import com.vayunmathur.office.util.currentOnlineDocId
-import com.vayunmathur.office.util.documentMembers
-import com.vayunmathur.office.util.enableOnlineSharing
-import com.vayunmathur.office.util.initSync
+
 import com.vayunmathur.office.util.insertChart
 import com.vayunmathur.office.util.insertChartIntoSheet
 import com.vayunmathur.office.util.insertChartIntoSlide
@@ -70,7 +66,7 @@ import com.vayunmathur.office.util.insertTable
 import com.vayunmathur.office.util.insertTextInRun
 import com.vayunmathur.office.util.rejectAllChanges
 import com.vayunmathur.office.util.rejectChange
-import com.vayunmathur.office.util.renameDocument
+
 import com.vayunmathur.office.util.replaceSheetImage
 import com.vayunmathur.office.util.replaceSlideImage
 import com.vayunmathur.office.util.replaceTextImage
@@ -78,7 +74,7 @@ import com.vayunmathur.office.util.resolveComment
 import com.vayunmathur.office.util.rotateSheetImage
 import com.vayunmathur.office.util.rotateSlideImage
 import com.vayunmathur.office.util.rotateTextImage
-import com.vayunmathur.office.util.securityCodeWith
+
 import com.vayunmathur.office.util.setCellBgColor
 import com.vayunmathur.office.util.setCellBorder
 import com.vayunmathur.office.util.setCellColor
@@ -87,7 +83,7 @@ import com.vayunmathur.office.util.setColumnWidth
 import com.vayunmathur.office.util.setFooterText
 import com.vayunmathur.office.util.setHeaderText
 import com.vayunmathur.office.util.setImageCrop
-import com.vayunmathur.office.util.setMemberRole
+
 import com.vayunmathur.office.util.setPageSetup
 import com.vayunmathur.office.util.setRowHeight
 import com.vayunmathur.office.util.setSheetImageCrop
@@ -98,10 +94,9 @@ import com.vayunmathur.office.util.setSlideElementStroke
 import com.vayunmathur.office.util.setSlideImageCrop
 import com.vayunmathur.office.util.setSlideNotes
 import com.vayunmathur.office.util.setSlideTransition
-import com.vayunmathur.office.util.shareCurrentDocument
-import com.vayunmathur.office.util.shareLinkFor
+
 import com.vayunmathur.office.util.slideNotesText
-import com.vayunmathur.office.util.transferOwnership
+
 import com.vayunmathur.office.util.updateChart
 import com.vayunmathur.office.util.updateMetadata
 import kotlinx.coroutines.CoroutineScope
@@ -118,8 +113,7 @@ import kotlinx.coroutines.launch
  */
 open class DocumentOverlayState {
     var showMetadata by mutableStateOf(false)
-    var showShareDialog by mutableStateOf(false)
-    var showEnableOnlineDialog by mutableStateOf(false)
+
     val showUnsavedDialogState = mutableStateOf(false)
     var showUnsavedDialog by showUnsavedDialogState
     var showSettings by mutableStateOf(false)
@@ -205,7 +199,6 @@ fun DocumentOverlays(
     document: OdfDocument,
     viewModel: OfficeViewModel,
     isPresentation: Boolean,
-    isOnline: Boolean,
     focusedPara: Int,
     saveAsName: String,
     activeCell: MutableState<Triple<Int, Int, Int>?>,
@@ -219,7 +212,6 @@ fun DocumentOverlays(
     listState: LazyListState,
     scope: CoroutineScope,
     launchers: DocumentLaunchers,
-    onBecameOnline: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -227,9 +219,7 @@ fun DocumentOverlays(
         metadata = document.metadata,
         onSave = { m -> viewModel.updateMetadata { m } },
         onDismiss = { state.showMetadata = false })
-    LaunchedEffect(Unit) { viewModel.initSync() }
-    ShareOverlays(
-        state, document, viewModel, isOnline, saveAsName, launchers, onBecameOnline, onBack)
+    ShareOverlays(state, viewModel, saveAsName, launchers, onBack)
     SettingsOverlay(state, viewModel, context)
     RunStyleOverlays(state, viewModel, activeRunStart, activeRunEnd, selStart, selEnd)
     InsertOverlays(state, viewModel, focusedPara, activeRunStart, activeRunEnd, selStart)
@@ -237,7 +227,8 @@ fun DocumentOverlays(
     CellOverlays(state, viewModel, activeCell, activeSlide, activeSlideEl)
     SlideOverlays(
         state, document, viewModel, isPresentation, activeCell, activeSlide,
-        pendingReplace, launchers, focusedPara)
+        pendingReplace, launchers, focusedPara
+    )
     SlideCropOverlay(state, document, viewModel, pendingReplace, launchers)
     SheetCropOverlay(state, document, viewModel, pendingReplace, launchers)
 }
@@ -302,91 +293,50 @@ private fun SheetCropOverlay(
 @Composable
 private fun ShareOverlays(
     state: DocumentOverlayState,
-    document: OdfDocument,
     viewModel: OfficeViewModel,
-    isOnline: Boolean,
     saveAsName: String,
     launchers: DocumentLaunchers,
-    onBecameOnline: (String) -> Unit,
     onBack: () -> Unit,
 ) {
-    if (state.showEnableOnlineDialog) {
-        EnableOnlineDialog(
-            onEnable =
-                { viewModel.enableOnlineSharing(); state.showEnableOnlineDialog = false; state.showShareDialog = true },
-            onDismiss = { state.showEnableOnlineDialog = false }
-        )
-    }
-    if (state.showShareDialog) {
-        ShareDialogBody(state, document, viewModel, isOnline, onBecameOnline)
-    }
     if (state.showUnsavedDialog) AlertDialog(
         onDismissRequest = { state.showUnsavedDialog = false },
-        title = { Text(stringResource(R.string.unsaved_changes)) },
-        text = { Text(stringResource(R.string.unsaved_changes_message)) },
-        confirmButton = { TextButton(onClick = { state.showUnsavedDialog = false; onBack() }) { Text(
-            stringResource(R.string.discard),
-            color = MaterialTheme.colorScheme.error) } },
-        dismissButton = { Row {
-            TextButton(onClick = { state.showUnsavedDialog = false }) { Text(stringResource(UiR.string.cancel)) }
-            TextButton(onClick = {
-                state.showUnsavedDialog = false
-                if (viewModel.needsSaveAs()) launchers.saveAs.launch(saveAsName) else viewModel.save()
-            }) { Text(stringResource(UiR.string.save), fontWeight = FontWeight.Bold) } } })
+        title = { Text(stringResource(io.github.farhun.office.R.string.unsaved_changes)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.unsaved_changes_message)) },
+        confirmButton = {
+            TextButton(onClick = { state.showUnsavedDialog = false; onBack() }) {
+                Text(
+                    stringResource(io.github.farhun.office.R.string.discard),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = { state.showUnsavedDialog = false }) { Text(stringResource(UiR.string.cancel)) }
+                TextButton(onClick = {
+                    state.showUnsavedDialog = false
+                    if (viewModel.needsSaveAs()) launchers.saveAs.launch(saveAsName) else viewModel.save()
+                }) { Text(stringResource(UiR.string.save), fontWeight = FontWeight.Bold) }
+            }
+        })
     state.exportWarning?.let { action ->
         AlertDialog(
             onDismissRequest = { state.exportWarning = null },
-            title = { Text(stringResource(R.string.export_to_non_odf_format)) },
-            text = { Text(stringResource(R.string.some_formatting_and_features_may_be_lost)) },
-            confirmButton = { TextButton(onClick = { state.exportWarning = null; action() }) { Text(
-                stringResource(R.string.export_1),
-                fontWeight = FontWeight.Bold) } },
+            title = { Text(stringResource(io.github.farhun.office.R.string.export_to_non_odf_format)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.some_formatting_and_features_may_be_lost)) },
+            confirmButton = {
+                TextButton(onClick = { state.exportWarning = null; action() }) {
+                    Text(
+                        stringResource(io.github.farhun.office.R.string.export_1),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
             dismissButton =
                 { TextButton(onClick = { state.exportWarning = null }) { Text(stringResource(UiR.string.cancel)) } })
     }
 }
 
-/** Share dialog with live roster. */
-@Composable
-private fun ShareDialogBody(
-    state: DocumentOverlayState,
-    document: OdfDocument,
-    viewModel: OfficeViewModel,
-    isOnline: Boolean,
-    onBecameOnline: (String) -> Unit,
-) {
-    var members by remember { mutableStateOf<List<com.vayunmathur.office.util.OfficeMember>>(emptyList()) }
-    LaunchedEffect(state.showShareDialog) { viewModel.documentMembers { members = it } }
-    ShareOnlineDialog(
-        deviceId = viewModel.syncDeviceId,
-        isOwner = viewModel.currentDocRole() == com.vayunmathur.office.util.OfficeRoles.OWNER,
-        isOnline = isOnline,
-        initialName = document.title,
-        myRole = viewModel.currentDocRole(),
-        members = members,
-        shareLink = if (isOnline) viewModel.currentOnlineDocId()?.let { viewModel.shareLinkFor(it) } else null,
-        onShare = { recipientId, role, name, cb ->
-            viewModel.shareCurrentDocument(recipientId, role, name) { err ->
-                if (err == null) {
-                    viewModel.documentMembers { members = it } // refresh roster on success
-                    viewModel.currentOnlineDocId()?.let { onBecameOnline(it) } // now a cloud doc
-                }
-                cb(err)
-            }
-        },
-        onSetRole = { memberId, role ->
-            viewModel.setMemberRole(memberId, role) {
-                viewModel.documentMembers { members = it }
-            }
-        },
-        onRename = { name -> viewModel.renameDocument(name) },
-        onTransferOwner = { memberId ->
-            viewModel.transferOwnership(memberId) { viewModel.documentMembers { members = it } }
-        },
-        onComputeCode = { id, cb -> viewModel.securityCodeWith(id, cb) },
-        onDismiss = { state.showShareDialog = false }
-    )
-}
 
 /** Settings dialog overlay. */
 @Composable

@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun SpecialCharsDialog(onPick: (String) -> Unit, onDismiss: () -> Unit) {
@@ -32,7 +31,7 @@ fun SpecialCharsDialog(onPick: (String) -> Unit, onDismiss: () -> Unit) {
     )
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.special_character)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.special_character)) },
         text = {
             Column {
                 for (row in chars.chunked(6)) {

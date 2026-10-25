@@ -26,7 +26,7 @@ internal fun InsertMenu(
 ) {
     if (!isTextDoc) return
     Box {
-    TextButton(onClick = { s.insertMenu = true }) { Text(stringResource(R.string.insert)) }
+    TextButton(onClick = { s.insertMenu = true }) { Text(stringResource(io.github.farhun.office.R.string.insert)) }
     DropdownMenu(expanded = s.insertMenu, onDismissRequest = { s.insertMenu = false }) {
         @Composable
         fun fieldItem(labelRes: Int, kind: String) {
@@ -48,49 +48,49 @@ internal fun InsertMenu(
             )
         }
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.image_1)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.image_1)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; launchers.imagePicker.launch("image/*") })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.chart)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.chart)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; s.editingChartBlock = -1; s.showChartEditor = true })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.special_character_1)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.special_character_1)) },
             enabled = s.activeRunStart >= 0,
             onClick = { s.insertMenu = false; s.showSpecialChars = true })
-        fieldItem(R.string.date_field, "date")
-        fieldItem(R.string.time_field, "time")
-        fieldItem(R.string.page_number, "page-number")
-        fieldItem(R.string.page_count, "page-count")
-        fieldItem(R.string.file_name, "file-name")
-        fieldItem(R.string.meta_author, "author-name")
-        fieldItem(R.string.title_field, "title")
+        fieldItem(io.github.farhun.office.R.string.date_field, "date")
+        fieldItem(io.github.farhun.office.R.string.time_field, "time")
+        fieldItem(io.github.farhun.office.R.string.page_number, "page-number")
+        fieldItem(io.github.farhun.office.R.string.page_count, "page-count")
+        fieldItem(io.github.farhun.office.R.string.file_name, "file-name")
+        fieldItem(io.github.farhun.office.R.string.meta_author, "author-name")
+        fieldItem(io.github.farhun.office.R.string.title_field, "title")
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.bookmark)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.bookmark)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; s.showAddBookmark = true })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.footnote)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.footnote)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; s.showFootnote = true })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.comment_1)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.comment_1)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; s.showComment = true })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.table_of_contents)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.table_of_contents)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; viewModel.insertTableOfContents(focusedPara) })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.header_footer)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.header_footer)) },
             onClick = { s.insertMenu = false; s.showHeaderFooter = true })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.horizontal_line)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.horizontal_line)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; viewModel.insertHorizontalLine(focusedPara) })
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.page_break)) },
+            text = { Text(stringResource(io.github.farhun.office.R.string.page_break)) },
             enabled = focusedPara >= 0,
             onClick = { s.insertMenu = false; viewModel.insertPageBreak(focusedPara) })
     }

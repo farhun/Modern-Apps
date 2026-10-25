@@ -26,7 +26,7 @@ mechanically, and how to run those checks yourself.
 | :--- | :--- | :--- |
 | JDK | 21 | The PR check still runs 17; the release build runs 21 |
 | Android SDK | compileSdk 37 | `minSdk 31`, `targetSdk 37` |
-| NDK | 29.0.14206865 | Only needed for modules with Rust |
+| NDK | 26.1.10909125 | Only needed for modules with Rust |
 | Rust | 1.97.0 | Pinned in `rust-toolchain.toml`; target `aarch64-linux-android` |
 
 Point `local.properties` at your SDK. Apps build **arm64-only** by default.

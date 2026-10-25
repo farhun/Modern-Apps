@@ -15,7 +15,7 @@ import com.vayunmathur.office.util.OfficeViewModel
 import com.vayunmathur.office.util.insertImage
 import com.vayunmathur.office.util.insertImageIntoSheet
 import com.vayunmathur.office.util.insertImageIntoSlide
-import com.vayunmathur.office.util.setLocalCaret
+
 
 /** Value snapshot of the hoisted selection (avoids 9-param plumbing). */
 internal class ScreenSelection(
@@ -51,8 +51,7 @@ internal class ScreenSelectionHolder(s: DocumentScreenState) {
 internal class DocumentChrome(
     val isEditMode: Boolean,
     val hasUnsavedChanges: Boolean,
-    val isOnline: Boolean,
-    val onlineEnabled: Boolean,
+
     val isSaving: Boolean,
     val canUndo: Boolean,
     val canRedo: Boolean,
@@ -75,8 +74,7 @@ internal class DocumentChrome(
 internal fun rememberDocumentChrome(viewModel: OfficeViewModel, document: OdfDocument): DocumentChrome {
     val isEditMode by viewModel.isEditMode.collectAsState()
     val hasUnsavedChanges by viewModel.hasUnsavedChanges.collectAsState()
-    val isOnline by viewModel.isOnline.collectAsState()
-    val onlineEnabled by viewModel.onlineEnabled.collectAsState()
+
     val isSaving by viewModel.isSaving.collectAsState()
     val canUndo by viewModel.canUndo.collectAsState()
     val canRedo by viewModel.canRedo.collectAsState()
@@ -90,12 +88,13 @@ internal fun rememberDocumentChrome(viewModel: OfficeViewModel, document: OdfDoc
     val isSpreadsheet = document is OdfDocument.Spreadsheet
     val isPresentation = document is OdfDocument.Presentation
     val saveAsName = document.title.substringBeforeLast('.').ifBlank { "Untitled" } +
-        when { isTextDoc -> ".odt"; isSpreadsheet -> ".ods"; isPresentation -> ".odp"; else -> ".odg" }
+        when {
+            isTextDoc -> ".odt"; isSpreadsheet -> ".ods"; isPresentation -> ".odp"; else -> ".odg"
+        }
     return DocumentChrome(
         isEditMode = isEditMode,
         hasUnsavedChanges = hasUnsavedChanges,
-        isOnline = isOnline,
-        onlineEnabled = onlineEnabled,
+
         isSaving = isSaving,
         canUndo = canUndo,
         canRedo = canRedo,
@@ -144,7 +143,7 @@ internal fun rememberRunSelectionHandler(
         sel.activeTableBlock = -1
         sel.activeTableRow = -1
         sel.activeTableCol = -1
-        viewModel.setLocalCaret(gs)
+
     }
 }
 

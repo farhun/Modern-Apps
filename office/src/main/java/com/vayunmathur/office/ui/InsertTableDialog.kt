@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun InsertTableDialog(onInsert: (rows: Int, cols: Int) -> Unit, onDismiss: () -> Unit) {
@@ -24,19 +23,19 @@ fun InsertTableDialog(onInsert: (rows: Int, cols: Int) -> Unit, onDismiss: () ->
     var cols by remember { mutableStateOf("3") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.insert_table)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.insert_table)) },
         text = {
             Column {
                 TextField(
                     value = rows,
                     onValueChange = { rows = it },
-                    label = { Text(stringResource(R.string.rows)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.rows)) },
                     singleLine = true)
                 Spacer(Modifier.height(8.dp))
                 TextField(
                     value = cols,
                     onValueChange = { cols = it },
-                    label = { Text(stringResource(R.string.columns)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.columns)) },
                     singleLine = true)
             }
         },
@@ -46,7 +45,7 @@ fun InsertTableDialog(onInsert: (rows: Int, cols: Int) -> Unit, onDismiss: () ->
                 val c = cols.toIntOrNull()?.coerceIn(1, 26) ?: 3
                 onInsert(r, c)
                 onDismiss()
-            }) { Text(stringResource(R.string.insert)) }
+            }) { Text(stringResource(io.github.farhun.office.R.string.insert)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.cancel)) } }
     )

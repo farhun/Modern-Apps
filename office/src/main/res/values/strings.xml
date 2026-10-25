@@ -562,4 +562,9 @@
     <string name="document_theme_unchanged">Unchanged</string>
     <!-- Settings: Document theme option - follow system dark theme (Google Docs-like dark inversion) -->
     <string name="document_theme_follow_system">Follow system theme</string>
+    <string name="pdf_search">Search PDF</string>
+    <string name="pdf_no_matches">No matches</string>
+    <string name="pdf_search_error">Unable to search this PDF.</string>
+    <string name="pdf_match_count">%1$d / %2$d</string>
+    <string name="pdf_open_error">Unable to open this PDF.</string>
 </resources>

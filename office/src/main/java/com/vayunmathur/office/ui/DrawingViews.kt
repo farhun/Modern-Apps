@@ -26,7 +26,6 @@ import com.vayunmathur.library.ui.TextField
 import com.vayunmathur.library.ui.TextFieldDefaults
 import com.vayunmathur.library.ui.odf.OdfDocument
 import com.vayunmathur.library.ui.R as UiR
-import com.vayunmathur.office.R
 
 @Composable
 internal fun SlideElementTextField(key: String, initial: String, label: String, onChange: (String) -> Unit) {
@@ -45,7 +44,7 @@ internal fun SlideElementTextField(key: String, initial: String, label: String, 
 @Composable
 fun DrawingView(doc: OdfDocument.Drawing) {
     if (doc.pages.isEmpty()) { Text(
-        stringResource(R.string.empty_drawing),
+        stringResource(io.github.farhun.office.R.string.empty_drawing),
         modifier = Modifier.padding(16.dp)); return }
     var currentPage by remember { mutableIntStateOf(0) }
     Column(modifier = Modifier.fillMaxSize()) {
@@ -57,9 +56,9 @@ fun DrawingView(doc: OdfDocument.Drawing) {
                 horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(
                     onClick = { if (currentPage > 0) currentPage-- },
-                    enabled = currentPage > 0) { Text(stringResource(R.string.prev)) }
+                    enabled = currentPage > 0) { Text(stringResource(io.github.farhun.office.R.string.prev)) }
                 Text(
-                    stringResource(R.string.page_of, currentPage + 1, doc.pages.size),
+                    stringResource(io.github.farhun.office.R.string.page_of, currentPage + 1, doc.pages.size),
                     style = MaterialTheme.typography.titleSmall)
                 TextButton(
                     onClick = { if (currentPage < doc.pages.size - 1) currentPage++ },

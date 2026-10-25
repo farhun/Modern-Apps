@@ -47,7 +47,7 @@ internal fun MetadataDialog(metadata: OdfMetadata, onSave: (OdfMetadata) -> Unit
     var subject by remember { mutableStateOf(metadata.subject ?: "") }
     var description by remember { mutableStateOf(metadata.description ?: "") }
     var keywords by remember { mutableStateOf(metadata.keywords.joinToString(", ")) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.document_info)) },
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(io.github.farhun.office.R.string.document_info)) },
         text = {
             androidx.compose.foundation.layout.Column(Modifier.verticalScroll(rememberScrollState())) {
                 MetaTextFields(
@@ -99,34 +99,34 @@ private fun MetaTextFields(
     TextField(
         value = title,
         onValueChange = onTitle,
-        label = { Text(stringResource(R.string.meta_title)) },
+        label = { Text(stringResource(io.github.farhun.office.R.string.meta_title)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth())
     Spacer(Modifier.height(MetaFieldSpacing))
     TextField(
         value = author,
         onValueChange = onAuthor,
-        label = { Text(stringResource(R.string.meta_author)) },
+        label = { Text(stringResource(io.github.farhun.office.R.string.meta_author)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth())
     Spacer(Modifier.height(MetaFieldSpacing))
     TextField(
         value = subject,
         onValueChange = onSubject,
-        label = { Text(stringResource(R.string.meta_subject)) },
+        label = { Text(stringResource(io.github.farhun.office.R.string.meta_subject)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth())
     Spacer(Modifier.height(MetaFieldSpacing))
     TextField(
         value = description,
         onValueChange = onDescription,
-        label = { Text(stringResource(R.string.meta_description)) },
+        label = { Text(stringResource(io.github.farhun.office.R.string.meta_description)) },
         modifier = Modifier.fillMaxWidth())
     Spacer(Modifier.height(MetaFieldSpacing))
     TextField(
         value = keywords,
         onValueChange = onKeywords,
-        label = { Text(stringResource(R.string.meta_keywords)) },
+        label = { Text(stringResource(io.github.farhun.office.R.string.meta_keywords)) },
         singleLine = true,
         modifier = Modifier.fillMaxWidth())
 }
@@ -134,10 +134,10 @@ private fun MetaTextFields(
 /** Read-only metadata stat rows. */
 @Composable
 private fun MetaStatRows(metadata: OdfMetadata) {
-    metadata.creationDate?.let { MetadataRow(stringResource(R.string.meta_created), it) }
-    metadata.modifiedDate?.let { MetadataRow(stringResource(R.string.meta_modified), it) }
-    metadata.pageCount?.let { MetadataRow(stringResource(R.string.meta_pages), it.toString()) }
-    metadata.wordCount?.let { MetadataRow(stringResource(R.string.meta_words), it.toString()) }
+    metadata.creationDate?.let { MetadataRow(stringResource(io.github.farhun.office.R.string.meta_created), it) }
+    metadata.modifiedDate?.let { MetadataRow(stringResource(io.github.farhun.office.R.string.meta_modified), it) }
+    metadata.pageCount?.let { MetadataRow(stringResource(io.github.farhun.office.R.string.meta_pages), it.toString()) }
+    metadata.wordCount?.let { MetadataRow(stringResource(io.github.farhun.office.R.string.meta_words), it.toString()) }
     metadata.fileSize?.let { MetadataRow("File Size", formatFileSize(it)) }
 }
 

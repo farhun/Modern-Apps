@@ -7,28 +7,31 @@ _Install: ./install office (dev by default)._
 - Gradle: :office / dir: office/
 - Package roots present: ui
 - Entry files: MainActivity.kt (no Route.kt — `OfficeRoute` is inline)
-- Deps: :library:network, :library:e2ee-p2p
+- Deps: PDFBox Android for offline PDF text search; optional JP2 decoder for JPEG 2000 PDFs (no network services)
 - Metadata: metadata_data/office.md (present)
 - Rust: yes / screenshotTest: yes
 
 ## Overview
-**Purpose:** Document viewer/editor for ODF (odt/ods/odp) and Microsoft (docx/xlsx/pptx) files, with E2EE collaboration over a dumb relay. Internet only for collaboration.
+**Purpose:** Offline document viewer/editor for ODF (odt/ods/odp), Microsoft (docx/xlsx/pptx), and PDF files.
 **Key features:**
 - Full ODF + OOXML importers (`odf/`), incl. Excel formulas, number formats, charts, diagrams, themes, and math (ODF/OMML→MathML)
 - Editing across text, spreadsheets, and presentations with comments, change tracking, footnotes, headers/footers, and export/print menus
-- Native Rust formula engine + document CRDT (`OfficeNative`); online collaboration is E2EE with no accounts — the relay only forwards ciphertext
-- Opens files shared from other apps or `office://join` collaboration links
-**Architecture / data-flow:** Root-level document chrome + `ui/` type-specific views over the `util/OfficeViewModel*` family (split per surface: documents, text, sheet, slides, tables, sync A/B/C, export) backed by `:library:ui`'s `OdfDocument` model; sync goes through `util/OfficeSync` + `util/DocumentTreeCrdt` to the E2EE relay. `onCreateBeforeContent`: `NetworkClient.init(FIRST_PARTY)` → load settings → split join-links from document URIs; `Content()` roots the `OfficeRoute` (`Main` / `OfflineEditor` / `OnlineEditor`) graph and fires `initSync`.
-**Entry points + reading order:** `OfficeRoute` (`Main` / `OfflineEditor(uri)` / `OnlineEditor(docId)`, inline) → `MainActivity.kt` (`OfficeRoot`, `OfficeNavGraph`) → `OfficeDocumentPane.kt` → `util/OfficeViewModel.kt` → `odf/DocumentImporter.kt`.
+- Native Rust formula engine (`OfficeNative`)
+- Opens supported files from other apps and saves edits locally
+- Scrollable PDF viewing via Android PdfRenderer, with on-device text search and next/previous match navigation
+**Architecture / data-flow:** Root-level document chrome + `ui/` type-specific views over the `util/OfficeViewModel*` family (documents, text, sheet, slides, tables, export), backed by `:library:ui`'s `OdfDocument` model. `onCreateBeforeContent` loads settings and captures document URIs; `Content()` roots the `OfficeRoute` (`Main` / `OfflineEditor`) graph.
+**Entry points + reading order:** `OfficeRoute` (`Main` / `OfflineEditor(uri)`, inline) → `MainActivity.kt` (`OfficeRoot`, `OfficeNavGraph`) → `OfficeDocumentPane.kt` → `util/OfficeViewModel.kt` → `odf/DocumentImporter.kt`.
 **Gotchas:**
 - Display names must come from `OpenableColumns.DISPLAY_NAME`, not the URI path — `DocumentImporter` routes by extension and content URIs often have extensionless ids
 - The document "paper" stays light in dark mode by design (`OfficeLightTheme`); dark mode inverts luminance via a color matrix, never the model colors
 - `OfficeLightTheme` is public for `screenshotTest` — don't privatize it
-- `office://join` links never enter the document-loading path (different scheme); handle them via `parseJoinLink`/`handleJoinLink` only
+
 
 ## Key files
 ### Root — entry, chrome, and document shell
-- com/vayunmathur/office/MainActivity.kt — OfficeRoute, OfficeRoot, join-link handling
+- com/vayunmathur/office/MainActivity.kt — OfficeRoute, OfficeRoot
+- com/vayunmathur/office/ui/OfficePdfViewer.kt — PdfRenderer viewer and search controls
+- com/vayunmathur/office/ui/OfficePdfSearch.kt — PDFBox text extraction and match bounds
 - com/vayunmathur/office/DocumentScreenShell.kt
 - com/vayunmathur/office/DocumentScreenChrome.kt
 - com/vayunmathur/office/OfficeBottomBarHost.kt
@@ -40,12 +43,12 @@ _Install: ./install office (dev by default)._
 - com/vayunmathur/office/OfficeDocumentLaunchers.kt
 - com/vayunmathur/office/OfficeDocumentFindBars.kt
 - com/vayunmathur/office/OfficeHomeScreens.kt
-- com/vayunmathur/office/OfficeOnlineScreens.kt
-- com/vayunmathur/office/OfficeEnableOnlineDialog.kt
+
+
 - com/vayunmathur/office/OfficeOutlinePane.kt
 - com/vayunmathur/office/OfficeExportMenu.kt
 - com/vayunmathur/office/OfficeInsertMenu.kt
-- com/vayunmathur/office/OfficeShareMembers.kt
+
 - com/vayunmathur/office/OfficeCellOverlays.kt
 - com/vayunmathur/office/OfficeChangesOverlays.kt
 - com/vayunmathur/office/OfficeCommentsOverlays.kt
@@ -107,20 +110,20 @@ _Install: ./install office (dev by default)._
 - com/vayunmathur/office/ui/SortDialog.kt
 - com/vayunmathur/office/ui/SpecialCharsDialog.kt
 - com/vayunmathur/office/ui/SettingsDialog.kt
-### util/ — ViewModels, sync, CRDT, native bridge
+### util/ — ViewModels, native bridge
 - com/vayunmathur/office/util/OfficeViewModel.kt
 - com/vayunmathur/office/util/OfficeViewModelDocuments.kt
 - com/vayunmathur/office/util/OfficeViewModelText.kt
 - com/vayunmathur/office/util/OfficeViewModelSheet.kt
 - com/vayunmathur/office/util/OfficeViewModelSlides.kt
 - com/vayunmathur/office/util/OfficeViewModelTables.kt
-- com/vayunmathur/office/util/OfficeViewModelSyncA.kt
-- com/vayunmathur/office/util/OfficeViewModelSyncB.kt
-- com/vayunmathur/office/util/OfficeViewModelSyncC.kt
+
+
+
 - com/vayunmathur/office/util/OfficeViewModelExport.kt
-- com/vayunmathur/office/util/OfficeSync.kt
-- com/vayunmathur/office/util/DocumentTreeCrdt.kt
-- com/vayunmathur/office/util/OfficeNative.kt — Rust formula/CRDT bridge
+
+
+- com/vayunmathur/office/util/OfficeNative.kt — Rust formula bridge
 
 ## Verify (this module only)
 ```

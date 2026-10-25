@@ -62,11 +62,12 @@ internal fun ErrorBody(message: String, onOpenDocument: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(message, style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.height(16.dp))
         TextButton(onClick = onOpenDocument) {
-            Text(stringResource(R.string.open_document))
+            Text(stringResource(io.github.farhun.office.R.string.open_document))
         }
     }
 }
@@ -83,14 +84,16 @@ internal fun DocumentEffects(
     LaunchedEffect(s.showTimer) {
         if (s.showTimer) {
             s.timerSeconds = 0
-            while (s.showTimer) { kotlinx.coroutines.delay(TIMER_TICK_MS); s.timerSeconds++ }
+            while (s.showTimer) {
+                kotlinx.coroutines.delay(TIMER_TICK_MS); s.timerSeconds++
+            }
         }
     }
 
     // Always intercept back inside a document so it returns to the home screen instead of exiting
-    // the app. Online docs sync live (nothing to save); offline docs with edits prompt to save.
+    // the app. Prompt before leaving whenever there are unsaved local edits.
     BackHandler(enabled = true) {
-        if (!chrome.isOnline && chrome.hasUnsavedChanges) onShowUnsavedDialog() else onBack()
+        if (chrome.hasUnsavedChanges) onShowUnsavedDialog() else onBack()
     }
 }
 
@@ -110,13 +113,12 @@ internal fun DocumentDrawerShell(
     onShowUnsavedDialog: () -> Unit,
     sel: ScreenSelection,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
     focusedPara: Int,
     onBack: () -> Unit,
-    onBecameOnline: (String) -> Unit,
 ) {
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -156,7 +158,6 @@ internal fun DocumentDrawerShell(
             listState = listState,
             focusedPara = focusedPara,
             onBack = onBack,
-            onBecameOnline = onBecameOnline,
         )
     }
 }
@@ -177,7 +178,8 @@ internal fun DrawerOutline(
             listState,
             drawerState,
             scope,
-            Modifier.fillMaxWidth())
+            Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -193,31 +195,28 @@ internal fun DrawerScreenOverlays(
     listState: LazyListState,
     focusedPara: Int,
     onBack: () -> Unit,
-    onBecameOnline: (String) -> Unit,
 ) {
     DocumentOverlays(
-            state = s,
-            document = document,
-            viewModel = viewModel,
-            isPresentation = chrome.isPresentation,
-            isOnline = chrome.isOnline,
-            focusedPara = focusedPara,
-            saveAsName = chrome.saveAsName,
-            activeCell = s.activeCellState,
-            activeSlide = s.activeSlideState,
-            activeSlideEl = s.activeSlideElState,
-            activeRunStart = s.activeRunStartState,
-            activeRunEnd = s.activeRunEndState,
-            selStart = s.selStartState,
-            selEnd = s.selEndState,
-            pendingReplace = s.pendingReplaceState,
-            listState = listState,
-            scope = scope,
-            launchers = launchers,
-            onBecameOnline = onBecameOnline,
-            onBack = onBack,
-        )
-    }
+        state = s,
+        document = document,
+        viewModel = viewModel,
+        isPresentation = chrome.isPresentation,
+        focusedPara = focusedPara,
+        saveAsName = chrome.saveAsName,
+        activeCell = s.activeCellState,
+        activeSlide = s.activeSlideState,
+        activeSlideEl = s.activeSlideElState,
+        activeRunStart = s.activeRunStartState,
+        activeRunEnd = s.activeRunEndState,
+        selStart = s.selStartState,
+        selEnd = s.selEndState,
+        pendingReplace = s.pendingReplaceState,
+        listState = listState,
+        scope = scope,
+        launchers = launchers,
+        onBack = onBack,
+    )
+}
 
 /** App-bar scaffold with actions + bottom bar. */
 @Composable
@@ -235,21 +234,24 @@ internal fun DocumentScaffoldShell(
     onShowUnsavedDialog: () -> Unit,
     sel: ScreenSelection,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
     onBack: () -> Unit,
 ) {
     AppScaffold(
-        title = { Text(
-            document.title,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleSmall) },
+        title = {
+            Text(
+                document.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleSmall
+            )
+        },
         navigationIcon = {
             IconButton(onClick = {
-                if (!chrome.isOnline && chrome.hasUnsavedChanges) onShowUnsavedDialog() else onBack()
+                if (chrome.hasUnsavedChanges) onShowUnsavedDialog() else onBack()
             }) {
                 IconBack()
             }
@@ -303,7 +305,8 @@ internal fun ScaffoldBottomBar(
         s, document, viewModel, chrome.canEdit, chrome.isTextDoc, chrome.isSpreadsheet, chrome.isPresentation,
         sel.activeRunStart, sel.activeRunEnd, sel.selStart, sel.selEnd, sel.activeCell,
         sel.activeSlide, sel.activeSlideEl, launchers,
-        sel.activeTableBlock, sel.activeTableRow, sel.activeTableCol)
+        sel.activeTableBlock, sel.activeTableRow, sel.activeTableCol
+    )
 }
 
 /** Top-app-bar actions for [DocumentScreen]. */
@@ -319,9 +322,7 @@ internal fun DocumentScaffoldActions(
     if (canEdit) IconButton(onClick = { onToggleSearch() }) { IconSearch() }
     IconButton(onClick = { viewModel.undo() }, enabled = chrome.canUndo) { IconUndo() }
     IconButton(onClick = { viewModel.redo() }, enabled = chrome.canRedo) { IconRedo() }
-    if (!chrome.isOnline) {
-        SaveAction(viewModel, chrome, saveAsName, launchers)
-    }
+    SaveAction(viewModel, chrome, saveAsName, launchers)
 }
 
 /** Save / save-as action (offline only). */
@@ -360,7 +361,7 @@ internal fun DocumentScaffoldBody(
     listState: androidx.compose.foundation.lazy.LazyListState,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
@@ -370,7 +371,8 @@ internal fun DocumentScaffoldBody(
         ScaffoldMenuBars(
             s = s, document = document, viewModel = viewModel,
             activity = activity, chrome = chrome, launchers = launchers,
-            scope = scope, drawerState = drawerState, listState = listState)
+            scope = scope, drawerState = drawerState, listState = listState
+        )
         // Timer/search/font/word bars: see DocumentFindBars (file-length split).
         DocumentEditorPane(
             s = s,
@@ -411,8 +413,6 @@ internal fun ScaffoldMenuBars(
         isTextDoc = chrome.isTextDoc,
         isSpreadsheet = chrome.isSpreadsheet,
         isPresentation = chrome.isPresentation,
-        isOnline = chrome.isOnline,
-        onlineEnabled = chrome.onlineEnabled,
         hasUnsavedChanges = chrome.hasUnsavedChanges,
         saveAsName = chrome.saveAsName,
         wordCount = chrome.wordCount,
@@ -449,7 +449,7 @@ internal fun DocumentEditorPane(
     scope: kotlinx.coroutines.CoroutineScope,
     drawerState: com.vayunmathur.library.ui.DrawerState,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
@@ -460,20 +460,24 @@ internal fun DocumentEditorPane(
             (chrome.headings.isNotEmpty() || chrome.bookmarks.isNotEmpty())
         if (showOutline) {
             OfficeEditorWideLayout(
-                outline = { OfficeOutlinePane(
-                    chrome.bookmarks,
-                    chrome.headings,
-                    listState,
-                    drawerState,
-                    scope,
-                    Modifier.fillMaxSize()) },
+                outline = {
+                    OfficeOutlinePane(
+                        chrome.bookmarks,
+                        chrome.headings,
+                        listState,
+                        drawerState,
+                        scope,
+                        Modifier.fillMaxSize()
+                    )
+                },
                 document = {
                     EditorDocumentPane(
                         s = s, document = document, viewModel = viewModel, chrome = chrome,
                         listState = listState, onRunSelectionChange = onRunSelectionChange,
                         onCellFocus = onCellFocus, onCellSelected = onCellSelected,
                         onSlideChange = onSlideChange, onSlideElementSelected = onSlideElementSelected,
-                        modifier = Modifier.fillMaxSize())
+                        modifier = Modifier.fillMaxSize()
+                    )
                 },
             )
         } else {
@@ -482,7 +486,8 @@ internal fun DocumentEditorPane(
                 listState = listState, onRunSelectionChange = onRunSelectionChange,
                 onCellFocus = onCellFocus, onCellSelected = onCellSelected,
                 onSlideChange = onSlideChange, onSlideElementSelected = onSlideElementSelected,
-                modifier = Modifier.fillMaxSize())
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
@@ -496,7 +501,7 @@ internal fun EditorDocumentPane(
     chrome: DocumentChrome,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,

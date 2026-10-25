@@ -72,11 +72,11 @@ private fun SlideNotesOverlay(
     var text by remember(state.showSlideNotes) { mutableStateOf(viewModel.slideNotesText(activeSlide.value)) }
     AlertDialog(
         onDismissRequest = { state.showSlideNotes = false },
-        title = { Text(stringResource(R.string.speaker_notes)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.speaker_notes)) },
         text = { TextField(
             value = text,
             onValueChange = { text = it },
-            placeholder = { Text(stringResource(R.string.notes_for_this_slide)) },
+            placeholder = { Text(stringResource(io.github.farhun.office.R.string.notes_for_this_slide)) },
             modifier = Modifier.height(NotesFieldHeight)) },
         confirmButton = { TextButton(onClick = {
             viewModel.setSlideNotes(activeSlide.value, text)
@@ -118,7 +118,7 @@ private fun SlideTransitionOverlay(
     var expanded by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = { state.showSlideTransition = false },
-        title = { Text(stringResource(R.string.slide_transition_1)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.slide_transition_1)) },
         text = {
             androidx.compose.foundation.layout.Box {
                 TextButton(onClick = { expanded = true }) { Text(type.replaceFirstChar { it.uppercase() }) }

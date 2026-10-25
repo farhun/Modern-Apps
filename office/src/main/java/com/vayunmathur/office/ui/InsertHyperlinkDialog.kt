@@ -16,7 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun InsertHyperlinkDialog(onInsert: (text: String, url: String) -> Unit, onDismiss: () -> Unit) {
@@ -24,26 +23,26 @@ fun InsertHyperlinkDialog(onInsert: (text: String, url: String) -> Unit, onDismi
     var linkUrl by remember { mutableStateOf("https://") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.insert_hyperlink)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.insert_hyperlink)) },
         text = {
             Column {
                 TextField(
                     value = linkText,
                     onValueChange = { linkText = it },
-                    label = { Text(stringResource(R.string.display_text)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.display_text)) },
                     singleLine = true)
                 Spacer(Modifier.height(8.dp))
                 TextField(
                     value = linkUrl,
                     onValueChange = { linkUrl = it },
-                    label = { Text(stringResource(R.string.url)) },
+                    label = { Text(stringResource(io.github.farhun.office.R.string.url)) },
                     singleLine = true)
             }
         },
         confirmButton = {
             TextButton(onClick = {
                 if (linkText.isNotBlank() && linkUrl.isNotBlank()) { onInsert(linkText, linkUrl); onDismiss() }
-            }) { Text(stringResource(R.string.insert)) }
+            }) { Text(stringResource(io.github.farhun.office.R.string.insert)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(UiR.string.cancel)) } }
     )

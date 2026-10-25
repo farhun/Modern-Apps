@@ -38,7 +38,6 @@ import com.vayunmathur.library.ui.R as UiR
 import com.vayunmathur.library.ui.Text
 import com.vayunmathur.library.ui.TextButton
 import com.vayunmathur.library.ui.odf.OdfImage
-import com.vayunmathur.office.R
 
 @Composable
 fun ImageCropDialog(
@@ -61,7 +60,7 @@ fun ImageCropDialog(
         height = 0f)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.edit_image)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.edit_image)) },
         text = {
             Column {
                 Box(
@@ -69,8 +68,8 @@ fun ImageCropDialog(
                     contentAlignment = Alignment.Center) { OdfImageView(preview) }
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { onRotate() }) { Text(stringResource(R.string.rotate_90)) }
-                    TextButton(onClick = { onReplace(); onDismiss() }) { Text(stringResource(R.string.replace)) }
+                    TextButton(onClick = { onRotate() }) { Text(stringResource(io.github.farhun.office.R.string.rotate_90)) }
+                    TextButton(onClick = { onReplace(); onDismiss() }) { Text(stringResource(io.github.farhun.office.R.string.replace)) }
                 }
                 CropSlider("Left", left) { left = it }
                 CropSlider("Top", top) { top = it }
@@ -196,7 +195,7 @@ fun OdfImageView(image: OdfImage, modifier: Modifier = Modifier) {
         }
     } else {
         Box(modifier.fillMaxWidth().height(120.dp).padding(vertical = 4.dp).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.image), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(io.github.farhun.office.R.string.image), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

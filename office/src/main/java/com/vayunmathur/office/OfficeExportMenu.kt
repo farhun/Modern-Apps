@@ -47,7 +47,7 @@ private fun ExportDropdown(
                 s.exportWarning = run
             }
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.export_as_text)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.export_as_text)) },
                 onClick = {
                     s.exportMenu = false
                     val t = viewModel.exportAsPlainText()
@@ -61,7 +61,7 @@ private fun ExportDropdown(
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.flat_odf)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.flat_odf)) },
                 onClick = {
                     s.exportMenu = false
                     val ext = when {
@@ -89,35 +89,35 @@ private fun TextExportItems(
 ) {
     if (!isTextDoc) return
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.word_docx)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.word_docx)) },
         onClick = { warnExport { launchers.ooxmlExport.launch("$baseName.docx") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.pdf_pdf)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.pdf_pdf)) },
         onClick = { warnExport { launchers.pdfExport.launch("$baseName.pdf") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.html_html)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.html_html)) },
         onClick = { warnExport { launchers.htmlExport.launch("$baseName.html") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.rich_text_rtf)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.rich_text_rtf)) },
         onClick = { warnExport { launchers.rtfExport.launch("$baseName.rtf") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.epub_epub)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.epub_epub)) },
         onClick = { warnExport { launchers.epubExport.launch("$baseName.epub") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.latex_tex)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.latex_tex)) },
         onClick = { warnExport { launchers.latexExport.launch("$baseName.tex") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.markdown_md)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.markdown_md)) },
         onClick = { warnExport { launchers.markdownExport.launch("$baseName.md") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.text_txt)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.text_txt)) },
         onClick = { warnExport { launchers.txtExport.launch("$baseName.txt") } },
     )
 }
@@ -132,15 +132,15 @@ private fun SheetExportItems(
 ) {
     if (!isSpreadsheet) return
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.excel_xlsx)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.excel_xlsx)) },
         onClick = { warnExport { launchers.ooxmlExport.launch("$baseName.xlsx") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.csv)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.csv)) },
         onClick = { warnExport { launchers.csvExport.launch("$baseName.csv") } },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.tsv)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.tsv)) },
         onClick = { warnExport { launchers.tsvExport.launch("$baseName.tsv") } },
     )
 }
@@ -155,7 +155,7 @@ private fun PresentationExportItems(
 ) {
     if (!isPresentation) return
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.powerpoint_pptx)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.powerpoint_pptx)) },
         onClick = { warnExport { launchers.ooxmlExport.launch("$baseName.pptx") } },
     )
 }

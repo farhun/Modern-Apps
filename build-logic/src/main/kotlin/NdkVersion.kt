@@ -5,4 +5,4 @@
  * [rustNativeLib] must name the same installed NDK, or cargo links against a different
  * toolchain than the one AGP builds the rest of the app with.
  */
-const val NDK_VERSION = "29.0.14206865"
+const val NDK_VERSION = "26.1.10909125"

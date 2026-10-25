@@ -11,14 +11,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.vayunmathur.office.R
 
 @Composable
 fun AddBookmarkDialog(onAdd: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.add_bookmark)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.add_bookmark)) },
         text = { TextField(
             value = name,
             onValueChange = { name = it },

@@ -7,56 +7,12 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * JNI bridge to the native `office_engine` Rust library: the ODF formula engine
- * and the document-tree CRDT, which now own these features outright (the former
- * Kotlin implementations have been deleted).
- *
- * ## CRDT wire format (SIGNED — do not change casually)
- * The Rust CRDT serializes Node/State byte-for-byte identically to the previous
- * Kotlin `kotlinx.serialization` output used on the collaboration wire
- * (`Json { ignoreUnknownKeys = true }`, i.e. `encodeDefaults = false` — default
- * fields `deleted`/`name`/`attrLamport`/`attrDev` are OMITTED). This was verified
- * with an exact-string round-trip test in the crate (`crdt::tests`). The
- * signed-collaboration path in [OfficeViewModel] signs the native engine's ops
- * JSON directly; [DocumentTreeCrdt] is a thin handle wrapper over these calls.
- *
- * ## Formula engine
- * Build a workbook handle once per sheet snapshot via [createWorkbook] (serialize
- * all sheets with [buildWorkbookJson]), then call [nativeDisplayValue]/
- * [nativeIsNumeric], and [nativeFree] when the snapshot changes. Non-deterministic
- * funcs (TODAY/NOW/RAND) read [nowMillis]. [nativeFormatValue] formats a lone
- * number with no workbook (XLSX cell display).
+ * JNI bridge to the native `office_engine` Rust ODF formula engine.
  */
 object OfficeNative {
     init {
         System.loadLibrary("office_engine")
     }
-
-    // ---- Document tree CRDT ----
-
-    /** Creates a native CRDT for [device]; returns a handle (0 on failure). */
-    external fun crdtNew(device: String): Long
-
-    /** Replaces the CRDT state from a serialized [State] JSON (ignores parse errors). */
-    external fun crdtLoadState(handle: Long, json: String)
-
-    /** Serializes the full [State] (byte-identical to the Kotlin serializer). */
-    external fun crdtSerialize(handle: Long): String
-
-    /** Merges a batch of remote node ops (a JSON array of Node). Commutative + idempotent. */
-    external fun crdtApply(handle: Long, opsJson: String)
-
-    /** Reconciles toward [xml], returning the produced ops as a JSON array of Node. */
-    external fun crdtUpdate(handle: Long, xml: String): String
-
-    /** Renders the current tree back to flat XML. */
-    external fun crdtRender(handle: Long): String
-
-    /** Serializes just the current state's node array (JSON array of Node). */
-    external fun crdtToStateNodesJson(handle: Long): String
-
-    /** Releases the CRDT. */
-    external fun crdtFree(handle: Long)
 
     // ---- ODF formula engine ----
 

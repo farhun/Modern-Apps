@@ -37,25 +37,25 @@ internal fun ChangesOverlays(
 val td = document as? OdfDocument.TextDocument
 val changes = td?.changes ?: emptyList()
 AlertDialog(onDismissRequest = { state.showChanges = false }, title = { Text(stringResource(
-    R.string.tracked_changes,
+    io.github.farhun.office.R.string.tracked_changes,
     changes.size)) },
     text = {
         Column(Modifier.verticalScroll(rememberScrollState())) {
-            if (changes.isEmpty()) Text(stringResource(R.string.no_tracked_changes_in_this_document))
+            if (changes.isEmpty()) Text(stringResource(io.github.farhun.office.R.string.no_tracked_changes_in_this_document))
             changes.forEach { ch ->
                 Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                     Text(stringResource(
-                        R.string.tracked_change_author_date,
+                        io.github.farhun.office.R.string.tracked_change_author_date,
                         ch.type.replaceFirstChar { it.uppercase() },
                         ch.author ?: stringResource(UiR.string.unknown),
                         ch.date?.let { " · ${it.take(SHARED_DATE_PREFIX_LENGTH)}" } ?: ""),
                         style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                     Row {
                         TextButton(onClick = { viewModel.acceptChange(ch.id) }) {
-                            Text(stringResource(R.string.accept))
+                            Text(stringResource(io.github.farhun.office.R.string.accept))
                         }
                         TextButton(onClick = { viewModel.rejectChange(ch.id) }) {
-                            Text(stringResource(R.string.reject))
+                            Text(stringResource(io.github.farhun.office.R.string.reject))
                         }
                     }
                     HorizontalDivider()
@@ -67,13 +67,13 @@ AlertDialog(onDismissRequest = { state.showChanges = false }, title = { Text(str
         Row {
             if (changes.isNotEmpty()) {
                 TextButton(onClick = { viewModel.acceptAllChanges() }) {
-                    Text(stringResource(R.string.accept_all))
+                    Text(stringResource(io.github.farhun.office.R.string.accept_all))
                 }
                 TextButton(onClick = { viewModel.rejectAllChanges() }) {
-                    Text(stringResource(R.string.reject_all))
+                    Text(stringResource(io.github.farhun.office.R.string.reject_all))
                 }
             }
-            TextButton(onClick = { state.showChanges = false }) { Text(stringResource(R.string.close_search)) }
+            TextButton(onClick = { state.showChanges = false }) { Text(stringResource(io.github.farhun.office.R.string.close_search)) }
         }
     })
 }

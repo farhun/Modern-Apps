@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -14,7 +12,7 @@
         android:theme="@style/Theme.General">
         <activity
             android:configChanges="mcc|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|keyboardHidden|layoutDirection|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
-            android:name=".MainActivity"
+            android:name="com.vayunmathur.office.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:resizeableActivity="true"
@@ -24,14 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="office" android:host="join" />
-            </intent-filter>
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -81,6 +71,7 @@
                 <data android:mimeType="text/xml" />
 
                 <data android:mimeType="text/plain" />
+                <data android:mimeType="application/pdf" />
 
                 <data android:scheme="content" />
                 <data android:scheme="file" />
@@ -133,6 +124,7 @@
                 <data android:mimeType="text/xml" />
 
                 <data android:mimeType="text/plain" />
+                <data android:mimeType="application/pdf" />
             </intent-filter>
         </activity>
     </application>

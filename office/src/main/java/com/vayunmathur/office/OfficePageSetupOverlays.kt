@@ -48,7 +48,7 @@ internal fun PageSetupOverlays(
     var marginCm by remember(state.showPageSetup) { mutableStateOf(cur.marginLeftPx / 37.795f) }
     AlertDialog(
         onDismissRequest = { state.showPageSetup = false },
-        title = { Text(stringResource(R.string.page_setup_1)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.page_setup_1)) },
         text = {
             Column {
                 PaperSizeRow(paper, { paper = it })
@@ -79,7 +79,7 @@ private val PAPERS = listOf(Paper("A4", 21f, 29.7f), Paper("Letter", 21.59f, 27.
 @Composable
 private fun PaperSizeRow(paper: String, onSelect: (String) -> Unit) {
     Text(
-        stringResource(R.string.paper_size),
+        stringResource(io.github.farhun.office.R.string.paper_size),
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Bold)
     Row {
@@ -95,25 +95,25 @@ private fun PaperSizeRow(paper: String, onSelect: (String) -> Unit) {
 @Composable
 private fun OrientationRow(landscape: Boolean, onSelect: (Boolean) -> Unit) {
     Text(
-        stringResource(R.string.orientation),
+        stringResource(io.github.farhun.office.R.string.orientation),
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Bold)
     Row {
         TextButton(onClick = { onSelect(false) }) {
             Text(
                 if (!landscape) {
-                    stringResource(R.string.portrait)
+                    stringResource(io.github.farhun.office.R.string.portrait)
                 } else {
-                    stringResource(R.string.portrait_1)
+                    stringResource(io.github.farhun.office.R.string.portrait_1)
                 },
             )
         }
         TextButton(onClick = { onSelect(true) }) {
             Text(
                 if (landscape) {
-                    stringResource(R.string.landscape)
+                    stringResource(io.github.farhun.office.R.string.landscape)
                 } else {
-                    stringResource(R.string.landscape_1)
+                    stringResource(io.github.farhun.office.R.string.landscape_1)
                 },
             )
         }
@@ -124,34 +124,34 @@ private fun OrientationRow(landscape: Boolean, onSelect: (Boolean) -> Unit) {
 @Composable
 private fun MarginsRow(marginCm: Float, onSelect: (Float) -> Unit) {
     Text(
-        stringResource(R.string.margins),
+        stringResource(io.github.farhun.office.R.string.margins),
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.Bold)
     Row {
         TextButton(onClick = { onSelect(MARGIN_NARROW_CM) }) {
             Text(
                 if (marginCm < MARGIN_NARROW_MAX) {
-                    stringResource(R.string.narrow)
+                    stringResource(io.github.farhun.office.R.string.narrow)
                 } else {
-                    stringResource(R.string.narrow_1)
+                    stringResource(io.github.farhun.office.R.string.narrow_1)
                 },
             )
         }
         TextButton(onClick = { onSelect(MARGIN_NORMAL_CM) }) {
             Text(
                 if (marginCm in MARGIN_NARROW_MAX..MARGIN_WIDE_MIN) {
-                    stringResource(R.string.normal_1)
+                    stringResource(io.github.farhun.office.R.string.normal_1)
                 } else {
-                    stringResource(R.string.normal)
+                    stringResource(io.github.farhun.office.R.string.normal)
                 },
             )
         }
         TextButton(onClick = { onSelect(MARGIN_WIDE_CM) }) {
             Text(
                 if (marginCm > MARGIN_WIDE_MIN) {
-                    stringResource(R.string.wide)
+                    stringResource(io.github.farhun.office.R.string.wide)
                 } else {
-                    stringResource(R.string.wide_1)
+                    stringResource(io.github.farhun.office.R.string.wide_1)
                 },
             )
         }

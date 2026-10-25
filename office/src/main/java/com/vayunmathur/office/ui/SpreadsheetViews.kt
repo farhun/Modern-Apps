@@ -47,7 +47,6 @@ import com.vayunmathur.library.ui.Text
 import com.vayunmathur.library.ui.TextButton
 import com.vayunmathur.library.ui.odf.OdfBorders
 import com.vayunmathur.library.ui.odf.OdfDocument
-import com.vayunmathur.office.R
 import com.vayunmathur.office.odf.ExcelFormula
 import com.vayunmathur.office.util.OfficeNative
 
@@ -74,7 +73,7 @@ fun SpreadsheetView(
     values: SpreadsheetValues = rememberNativeSpreadsheetValues(doc)
 ) {
     if (doc.sheets.isEmpty()) { Text(
-        stringResource(R.string.empty_spreadsheet),
+        stringResource(io.github.farhun.office.R.string.empty_spreadsheet),
         modifier = Modifier.padding(16.dp)); return }
 
     var selectedSheet by remember { mutableIntStateOf(0) }

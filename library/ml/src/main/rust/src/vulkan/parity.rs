@@ -43,7 +43,7 @@
 //! `libvulkan.so` at run time rather than linking it:
 //!
 //! ```text
-//! NDK=$ANDROID_HOME/ndk/29.0.14206865/toolchains/llvm/prebuilt/<host>/bin
+//! NDK=$ANDROID_HOME/ndk/26.1.10909125/toolchains/llvm/prebuilt/<host>/bin
 //! CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$NDK/aarch64-linux-android31-clang \
 //!   cargo test --release -p modelrunner --lib --no-run --target aarch64-linux-android
 //! adb push target/aarch64-linux-android/release/deps/modelrunner-<hash> /data/local/tmp/mr_test
@@ -115,8 +115,7 @@ fn on_device_at(plan: Plan, data: Vec<u8>, inputs: &[&[f32]], prefix: u32) -> Ve
     let weights = Weights::from_data(data);
     let mut net = Net::new(device(), plan, &weights, RESCALE_ONLY)
         .expect("the plan records into a command buffer");
-    net.set_params(StepParams { prefix, window_start: 0 })
-        .expect("the step params are written");
+    net.set_params(StepParams { prefix, window_start: 0 }).expect("the step params are written");
     net.infer_raw_many(inputs).expect("the command buffer submits and reads back")
 }
 
@@ -196,9 +195,7 @@ fn matches(what: &str, host: &[Vec<f32>], got: &[Vec<f32>]) {
             .iter()
             .zip(got)
             .enumerate()
-            .max_by(|(_, (a, b)), (_, (c, d))| {
-                (*a - *b).abs().total_cmp(&(*c - *d).abs())
-            })
+            .max_by(|(_, (a, b)), (_, (c, d))| (*a - *b).abs().total_cmp(&(*c - *d).abs()))
             .map(|(at, (a, b))| (at, *a, *b));
         if let Some((at, expected, actual)) = worst {
             let error = (expected - actual).abs() / scale;
@@ -228,24 +225,18 @@ fn the_cnn_spine_agrees_with_the_reference() {
     // Conv with a fused activation, the squeeze-excite pair, max pool, bilinear resize, add,
     // concat and a transposed convolution: the ops the two vision nets are made of.
     let input = spread(3 * 8 * 8, 0.0);
-    agrees_invented(
-        "the cnn spine",
-        8,
-        &[Shape::new(3, 8, 8)],
-        &[&input],
-        |b, ids| {
-            let x = b.conv(ids[0], 0, 8, (3, 3), (2, 2), (1, 1), (0, 0, 1, 1), 1, Act::HardSwish);
-            let pooled = b.global_avg_pool(x);
-            let gate = b.conv_same(pooled, 2, 8, 1, 1, Act::Sigmoid);
-            let gated = b.mul_channel(x, gate);
-            let deep = b.max_pool_2x2(gated);
-            let deep = b.conv_same(deep, 4, 8, 3, 1, Act::Relu);
-            let up = b.resize_like(deep, gated);
-            let merged = b.add(gated, up);
-            let joined = b.concat(&[merged, up]);
-            b.conv_transpose(joined, 6, 1, (2, 2), (2, 2), (0, 0, 0, 0), Act::Sigmoid)
-        },
-    );
+    agrees_invented("the cnn spine", 8, &[Shape::new(3, 8, 8)], &[&input], |b, ids| {
+        let x = b.conv(ids[0], 0, 8, (3, 3), (2, 2), (1, 1), (0, 0, 1, 1), 1, Act::HardSwish);
+        let pooled = b.global_avg_pool(x);
+        let gate = b.conv_same(pooled, 2, 8, 1, 1, Act::Sigmoid);
+        let gated = b.mul_channel(x, gate);
+        let deep = b.max_pool_2x2(gated);
+        let deep = b.conv_same(deep, 4, 8, 3, 1, Act::Relu);
+        let up = b.resize_like(deep, gated);
+        let merged = b.add(gated, up);
+        let joined = b.concat(&[merged, up]);
+        b.conv_transpose(joined, 6, 1, (2, 2), (2, 2), (0, 0, 0, 0), Act::Sigmoid)
+    });
 }
 
 #[test]
@@ -300,13 +291,9 @@ fn a_causal_softmax_agrees_with_the_reference() {
     // `row % out_h`, so a shader taking the flat row would leave head 1 unmasked, and the bound is
     // `query + 1`, so an off-by-one shows up as row 0 being a pair rather than a point.
     let scores = spread(2 * 5 * 5, 0.4);
-    agrees(
-        "a causal softmax",
-        &[Shape::new(2, 5, 5)],
-        &[&scores],
-        &[],
-        |b, ids| b.softmax_causal(ids[0]),
-    );
+    agrees("a causal softmax", &[Shape::new(2, 5, 5)], &[&scores], &[], |b, ids| {
+        b.softmax_causal(ids[0])
+    });
 }
 
 #[test]
@@ -355,13 +342,9 @@ fn a_reshape_moves_the_same_elements_on_the_device() {
     // position. One `vkCmdCopyBuffer`, so what is under test is that the shapes either side agree
     // about the element count.
     let x = spread(16, 0.3);
-    agrees(
-        "reshape",
-        &[Shape::new(16, 1, 1)],
-        &[&x],
-        &[],
-        |b, ids| b.reshaped(ids[0], Shape::new(1, 1, 16)),
-    );
+    agrees("reshape", &[Shape::new(16, 1, 1)], &[&x], &[], |b, ids| {
+        b.reshaped(ids[0], Shape::new(1, 1, 16))
+    });
 }
 
 #[test]

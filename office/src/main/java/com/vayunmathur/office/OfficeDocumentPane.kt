@@ -3,18 +3,18 @@ package com.vayunmathur.office
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+
 import com.vayunmathur.library.ui.MaterialTheme
 import com.vayunmathur.library.ui.Surface
 import com.vayunmathur.library.ui.Text
@@ -50,7 +50,7 @@ import com.vayunmathur.office.util.setCellBold
 import com.vayunmathur.office.util.setCellColor
 import com.vayunmathur.office.util.setCellItalic
 import com.vayunmathur.office.util.setCheckboxChecked
-import com.vayunmathur.office.util.setLocalLocation
+
 import com.vayunmathur.office.util.setSheetElementBounds
 import com.vayunmathur.office.util.setSheetFreeze
 import com.vayunmathur.office.util.setSlideElementBounds
@@ -82,7 +82,7 @@ fun OfficeDocumentPane(
     isEditMode: Boolean,
     activeSlideEl: Int,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
@@ -93,55 +93,38 @@ fun OfficeDocumentPane(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
-        val presence by viewModel.remotePresence.collectAsState()
-        PresenceBanner(presence)
         OfficeLightTheme {
-          Surface(
-            Modifier
-                .fillMaxSize()
-                .then(if (documentDarkMode) Modifier.documentDarkModeInvert() else Modifier),
-            color = MaterialTheme.colorScheme.background,
-          ) {
-        when (document) {
-            is OdfDocument.TextDocument -> TextPane(
-                document, viewModel, searchQuery, fontSizeMultiplier, listState,
-                presence, onRunSelectionChange, onCellFocus, onChartClick, onCropImage)
-            is OdfDocument.Spreadsheet -> SheetPane(
-                document, viewModel, searchQuery, fontSizeMultiplier, isEditMode,
-                onCellSelected, onCropSheet)
-            is OdfDocument.Presentation -> SlidePane(
-                document, viewModel, isEditMode, activeSlideEl,
-                onSlideChange, onSlideElementSelected, onCropSlide)
-            is OdfDocument.Drawing -> DrawingView(document)
-        }
-          }
+            Surface(
+                Modifier
+                    .fillMaxSize()
+                    .then(if (documentDarkMode) Modifier.documentDarkModeInvert() else Modifier),
+                color = MaterialTheme.colorScheme.background,
+            ) {
+                when (document) {
+                    is OdfDocument.TextDocument -> TextPane(
+                        document, viewModel, searchQuery, fontSizeMultiplier, listState,
+                        onRunSelectionChange, onCellFocus, onChartClick, onCropImage
+                    )
+
+                    is OdfDocument.Spreadsheet -> SheetPane(
+                        document, viewModel, searchQuery, fontSizeMultiplier, isEditMode,
+                        onCellSelected, onCropSheet
+                    )
+
+                    is OdfDocument.Presentation -> SlidePane(
+                        document, viewModel, isEditMode, activeSlideEl,
+                        onSlideChange, onSlideElementSelected, onCropSlide
+                    )
+
+                    is OdfDocument.Drawing -> DrawingView(document)
+                }
+            }
         }
         // Night reading mode: a view-only dimming scrim (does not modify or save the document). (C4)
         if (nightMode) Box(Modifier.matchParentSize().background(Color(NIGHT_SCRIM)))
     }
 }
 
-/** Remote-presence banner. */
-@Composable
-private fun PresenceBanner(
-    presence: List<com.vayunmathur.office.util.OfficePresence>,
-) {
-    if (presence.isEmpty()) return
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.zIndex(1f).fillMaxWidth()
-    ) {
-        val typingLabel = stringResource(R.string.typing)
-        Text(
-            presence.joinToString(", ") { p ->
-                p.name + (p.loc?.let { l -> " · $l" } ?: "") + if (p.typing) typingLabel else ""
-            }
-                .let { stringResource(R.string.online_1, it) },
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-        )
-    }
-}
 
 /** Text-document pane. */
 @Composable
@@ -151,24 +134,18 @@ private fun TextPane(
     searchQuery: String,
     fontSizeMultiplier: Float,
     listState: LazyListState,
-    presence: List<com.vayunmathur.office.util.OfficePresence>,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
-    onCellFocus: (Int, Int, Int) -> Unit,
+    onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onChartClick: (Int) -> Unit,
     onCropImage: (Int) -> Unit,
 ) {
-    val remoteCarets = presence.mapNotNull { p ->
-        p.caret?.let { com.vayunmathur.library.ui.odf.RemoteCaret(
-            it,
-            0xFF000000L or (p.id.hashCode().toLong() and 0xFFFFFFL),
-            p.name) }
-    }
+
     TextDocumentView(
         doc = document,
         searchQuery = searchQuery,
         fontSizeMultiplier = fontSizeMultiplier,
         listState = listState,
-        remoteCarets = remoteCarets,
+
         onRunSelectionChange = { rs, re, gs, ge -> onRunSelectionChange(rs, re, gs, ge) },
         onRunTextChange = { rs, re, text -> viewModel.updateParagraphRun(rs, re, text) },
         onRunEnter = { rs, re, gPos -> viewModel.handleListEnter(rs, re, gPos) },
@@ -179,7 +156,9 @@ private fun TextPane(
         },
         onDeletePrevBlock = { runStart -> viewModel.deleteBlockBefore(runStart) },
         onCellTextChange = { bi, r, c, text -> viewModel.updateTextTableCell(bi, r, c, text) },
-        onCellFocus = { bi, r, c -> onCellFocus(bi, r, c) },
+        onCellFocus = { bi, r, c, selectionStart, selectionEnd ->
+            onCellFocus(bi, r, c, selectionStart, selectionEnd)
+        },
         onChartClick = { bi -> onChartClick(bi) },
         onCropImage = { bi -> onCropImage(bi) })
 }
@@ -209,10 +188,7 @@ private fun SheetPane(
         onAddSheet = { viewModel.addSheet() },
         onDeleteSheet = { s -> viewModel.deleteSheet(s) },
         onSort = { s, col, asc -> viewModel.sortRows(s, col, asc) },
-        onCellSelected = { s, r, c ->
-            onCellSelected(s, r, c)
-            viewModel.setLocalLocation("Sheet ${s + 1} · ${('A' + c)}${r + 1}")
-        },
+        onCellSelected = { s, r, c -> onCellSelected(s, r, c) },
         onFloatingBoundsChange = { s, e, x, y, w, h -> viewModel.setSheetElementBounds(s, e, x, y, w, h) },
         onFloatingTextChange = { s, e, t -> viewModel.updateSheetElementText(s, e, t) },
         onFloatingDelete = { s, e -> viewModel.deleteSheetElement(s, e) },
@@ -243,7 +219,7 @@ private fun SlidePane(
         onElementBoundsChange = { s, e, x, y, w, h -> viewModel.setSlideElementBounds(s, e, x, y, w, h) },
         onDeleteElement = { s, e -> viewModel.deleteSlideElement(s, e) },
         selectedElement = activeSlideEl,
-        onSlideChange = { onSlideChange(it); viewModel.setLocalLocation("Slide ${it + 1}") },
+        onSlideChange = onSlideChange,
         onElementSelected = { s, e -> onSlideElementSelected(s, e) },
         onCropImage = { s, e -> onCropSlide(s, e) })
 }

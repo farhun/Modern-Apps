@@ -85,11 +85,11 @@ private fun CellCommentOverlay(
     var text by remember(state.showCellComment) { mutableStateOf(viewModel.cellCommentText(s, r, c)) }
     AlertDialog(
         onDismissRequest = { state.showCellComment = false },
-        title = { Text(stringResource(R.string.cell_comment)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.cell_comment)) },
         text = { TextField(
             value = text,
             onValueChange = { text = it },
-            placeholder = { Text(stringResource(R.string.comment)) },
+            placeholder = { Text(stringResource(io.github.farhun.office.R.string.comment)) },
             modifier = Modifier.height(CommentFieldHeight)) },
         confirmButton = { TextButton(onClick = {
             viewModel.setCellComment(s, r, c, "", text)
@@ -112,18 +112,18 @@ private fun CellResizeOverlay(
     var h by remember(state.showCellResize) { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { state.showCellResize = false },
-        title = { Text(stringResource(R.string.row_column_size_1)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.row_column_size_1)) },
         text = {
             Column {
                 TextField(
                     value = w,
                     onValueChange = { w = it },
-                    label = { Text(stringResource(R.string.column_width_px)) })
+                    label = { Text(stringResource(io.github.farhun.office.R.string.column_width_px)) })
                 Spacer(Modifier.height(DialogSpacing))
                 TextField(
                     value = h,
                     onValueChange = { h = it },
-                    label = { Text(stringResource(R.string.row_height_px)) })
+                    label = { Text(stringResource(io.github.farhun.office.R.string.row_height_px)) })
             }
         },
         confirmButton = { TextButton(onClick = {

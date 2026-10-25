@@ -23,6 +23,7 @@ import com.vayunmathur.library.ui.IconDownload
 import com.vayunmathur.library.ui.IconSave
 import com.vayunmathur.library.ui.IconSettings
 import com.vayunmathur.library.ui.IconShare
+
 import com.vayunmathur.library.ui.Surface
 import com.vayunmathur.library.ui.Text
 import com.vayunmathur.library.ui.TextButton
@@ -56,8 +57,6 @@ fun DocumentMenuBar(
     isTextDoc: Boolean,
     isSpreadsheet: Boolean = false,
     isPresentation: Boolean,
-    isOnline: Boolean,
-    onlineEnabled: Boolean,
     hasUnsavedChanges: Boolean,
     saveAsName: String,
     wordCount: Int,
@@ -76,17 +75,20 @@ fun DocumentMenuBar(
         viewModel.runParagraphIndexAt(
             s.activeRunStartState.value,
             s.activeRunEndState.value,
-            s.selStartState.value)
+            s.selStartState.value
+        )
     } else {
         -1
     }
     Surface(tonalElevation = 2.dp) {
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 4.dp)) {
             FileMenu(
-                s, document, viewModel, activity, isOnline, onlineEnabled,
-                hasUnsavedChanges, saveAsName, launchers, context)
+                s, document, viewModel, activity,
+                hasUnsavedChanges, saveAsName, launchers, context
+            )
             ExportMenu(
-                s, document, viewModel, isTextDoc, isSpreadsheet, isPresentation, launchers)
+                s, document, viewModel, isTextDoc, isSpreadsheet, isPresentation, launchers
+            )
             // Edit menu removed: Search moved to a top
             // Insert
             InsertMenu(s, viewModel, isTextDoc, menuFocusedPara, launchers)
@@ -95,7 +97,8 @@ fun DocumentMenuBar(
             ViewMenu(
                 s, viewModel, isTextDoc, isPresentation, headings, bookmarks,
                 wordCount, charCount, readingTime, nightMode, documentDarkMode,
-                scope, drawerState)
+                scope, drawerState
+            )
         }
     }
 }
@@ -107,32 +110,21 @@ private fun FileMenu(
     document: OdfDocument,
     viewModel: OfficeViewModel,
     activity: ComponentActivity,
-    isOnline: Boolean,
-    onlineEnabled: Boolean,
     hasUnsavedChanges: Boolean,
     saveAsName: String,
     launchers: DocumentLaunchers,
     context: android.content.Context,
 ) {
     Box {
-        TextButton(onClick = { s.fileMenu = true }) { Text(stringResource(R.string.file)) }
+        TextButton(onClick = { s.fileMenu = true }) { Text(stringResource(io.github.farhun.office.R.string.file)) }
         DropdownMenu(expanded = s.fileMenu, onDismissRequest = { s.fileMenu = false }) {
-            if (!isOnline) {
-                SaveMenuItems(s, viewModel, hasUnsavedChanges, saveAsName, launchers)
-            } else {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.synced_to_cloud)) },
-                    enabled = false,
-                    leadingIcon = { IconSave() },
-                    onClick = {})
-            }
-            ShareOnlineItem(s, onlineEnabled)
+            SaveMenuItems(s, viewModel, hasUnsavedChanges, saveAsName, launchers)
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.print_doc)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.print_doc)) },
                 onClick = { s.fileMenu = false; printDocument(activity, document) })
             ShareFileItem(s, viewModel, context)
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.export)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.export)) },
                 leadingIcon = { IconDownload() },
                 onClick = { s.fileMenu = false; s.exportMenu = true })
             HorizontalDivider()
@@ -144,7 +136,7 @@ private fun FileMenu(
     }
 }
 
-/** Save + save-as items (offline only). */
+/** Save + save-as items. */
 @Composable
 private fun SaveMenuItems(
     s: DocumentScreenState,
@@ -167,26 +159,10 @@ private fun SaveMenuItems(
         },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.save_as_1)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.save_as_1)) },
         onClick = { s.fileMenu = false; launchers.saveAs.launch(saveAsName) })
 }
 
-/** Share-online item (opens share or enable-online dialog). */
-@Composable
-private fun ShareOnlineItem(s: DocumentScreenState, onlineEnabled: Boolean) {
-    DropdownMenuItem(
-        text = { Text(stringResource(R.string.share_online_1)) },
-        leadingIcon = { IconShare() },
-        onClick = {
-            s.fileMenu = false
-            if (onlineEnabled) {
-                s.showShareDialog = true
-            } else {
-                s.showEnableOnlineDialog = true
-            }
-        },
-    )
-}
 
 /** System share-sheet item for the source file. */
 @Composable
@@ -230,18 +206,18 @@ private fun ViewMenu(
     drawerState: DrawerState,
 ) {
     Box {
-        TextButton(onClick = { s.viewMenu = true }) { Text(stringResource(R.string.view)) }
+        TextButton(onClick = { s.viewMenu = true }) { Text(stringResource(io.github.farhun.office.R.string.view)) }
         DropdownMenu(expanded = s.viewMenu, onDismissRequest = { s.viewMenu = false }) {
             if (isTextDoc && (headings.isNotEmpty() || bookmarks.isNotEmpty())) DropdownMenuItem(
-                text = { Text(stringResource(R.string.outline)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.outline)) },
                 onClick = { s.viewMenu = false; scope.launch { drawerState.open() } })
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.zoom_text)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.zoom_text)) },
                 onClick = { s.viewMenu = false; s.showFontControl = !s.showFontControl })
             ThemeMenuItems(s, viewModel, nightMode, documentDarkMode)
             TextDocViewItems(s, isTextDoc, wordCount, charCount, readingTime)
             if (isPresentation) DropdownMenuItem(
-                text = { Text(stringResource(R.string.presentation_timer)) },
+                text = { Text(stringResource(io.github.farhun.office.R.string.presentation_timer)) },
                 onClick = { s.viewMenu = false; s.showTimer = !s.showTimer })
         }
     }
@@ -259,9 +235,9 @@ private fun ThemeMenuItems(
         text = {
             Text(
                 if (nightMode) {
-                    stringResource(R.string.night_reading_mode)
+                    stringResource(io.github.farhun.office.R.string.night_reading_mode)
                 } else {
-                    stringResource(R.string.night_reading_mode_1)
+                    stringResource(io.github.farhun.office.R.string.night_reading_mode_1)
                 },
             )
         },
@@ -271,9 +247,9 @@ private fun ThemeMenuItems(
         text = {
             Text(
                 if (documentDarkMode) {
-                    stringResource(R.string.document_dark_mode)
+                    stringResource(io.github.farhun.office.R.string.document_dark_mode)
                 } else {
-                    stringResource(R.string.document_dark_mode_1)
+                    stringResource(io.github.farhun.office.R.string.document_dark_mode_1)
                 },
             )
         },
@@ -295,25 +271,34 @@ private fun TextDocViewItems(
         text = {
             Text(
                 if (s.showWordBar) {
-                    stringResource(R.string.word_count_bar)
+                    stringResource(io.github.farhun.office.R.string.word_count_bar)
                 } else {
-                    stringResource(R.string.word_count_bar_1)
+                    stringResource(io.github.farhun.office.R.string.word_count_bar_1)
                 },
             )
         },
         onClick = { s.viewMenu = false; s.showWordBar = !s.showWordBar },
     )
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.comments)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.comments)) },
         onClick = { s.viewMenu = false; s.showComments = true })
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.track_changes)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.track_changes)) },
         onClick = { s.viewMenu = false; s.showChanges = true })
     DropdownMenuItem(
-        text = { Text(stringResource(R.string.page_setup)) },
+        text = { Text(stringResource(io.github.farhun.office.R.string.page_setup)) },
         onClick = { s.viewMenu = false; s.showPageSetup = true })
     if (wordCount > 0) DropdownMenuItem(
-        text = { Text(stringResource(R.string.words_chars_min, wordCount, charCount, readingTime)) },
+        text = {
+            Text(
+                stringResource(
+                    io.github.farhun.office.R.string.words_chars_min,
+                    wordCount,
+                    charCount,
+                    readingTime
+                )
+            )
+        },
         enabled = false,
         onClick = { })
 }

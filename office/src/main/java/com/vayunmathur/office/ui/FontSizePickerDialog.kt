@@ -18,14 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.vayunmathur.office.R
 
 @Composable
 fun FontSizePickerDialog(onSizeSelected: (Float) -> Unit, onDismiss: () -> Unit) {
     val sizes = listOf(8f, 9f, 10f, 11f, 12f, 14f, 16f, 18f, 20f, 24f, 28f, 32f, 36f, 48f, 72f)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.font_size_1)) },
+        title = { Text(stringResource(io.github.farhun.office.R.string.font_size_1)) },
         text = {
             Column {
                 for (row in sizes.chunked(5)) {

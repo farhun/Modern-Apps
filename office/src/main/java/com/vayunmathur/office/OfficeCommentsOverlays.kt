@@ -56,17 +56,17 @@ internal fun CommentsOverlays(
         }
     }
     AlertDialog(onDismissRequest = { state.showComments = false }, title = { Text(stringResource(
-        R.string.comments_1,
+        io.github.farhun.office.R.string.comments_1,
         comments.size)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                if (comments.isEmpty()) Text(stringResource(R.string.no_comments_yet_use_insert_comment_to_ad))
+                if (comments.isEmpty()) Text(stringResource(io.github.farhun.office.R.string.no_comments_yet_use_insert_comment_to_ad))
                 comments.forEach { (bi, si, ann) ->
                     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                         Text(
                             stringResource(
-                                R.string.annotation_author_date,
-                                ann.author ?: stringResource(R.string.anonymous),
+                                io.github.farhun.office.R.string.annotation_author_date,
+                                ann.author ?: stringResource(io.github.farhun.office.R.string.anonymous),
                                 ann.date?.let { " · $it" } ?: "",
                             ),
                             style = MaterialTheme.typography.labelMedium,
@@ -78,10 +78,10 @@ internal fun CommentsOverlays(
                         Row {
                             TextButton(onClick = { scope.launch { listState.animateScrollToItem(bi.coerceIn(
                                 0,
-                                (td?.content?.size ?: 1) - 1)) } }) { Text(stringResource(R.string.go_to)) }
+                                (td?.content?.size ?: 1) - 1)) } }) { Text(stringResource(io.github.farhun.office.R.string.go_to)) }
                             TextButton(onClick = { viewModel.resolveComment(
                                 bi,
-                                si) }) { Text(stringResource(R.string.resolve)) }
+                                si) }) { Text(stringResource(io.github.farhun.office.R.string.resolve)) }
                         }
                         HorizontalDivider()
                     }
@@ -89,7 +89,7 @@ internal fun CommentsOverlays(
             }
         },
         confirmButton = {
-            TextButton(onClick = { state.showComments = false }) { Text(stringResource(R.string.close_search)) }
+            TextButton(onClick = { state.showComments = false }) { Text(stringResource(io.github.farhun.office.R.string.close_search)) }
         },
     )
 }
