@@ -106,6 +106,7 @@ fun ContinuousParagraphEditor(
     caretRequest: Int? = null,
     onCaretRequestHandled: () -> Unit = {},
     remoteCarets: List<RemoteCaret> = emptyList(),
+    readOnly: Boolean = false,
 ) {
     val paras = (start..endInclusive).mapNotNull { (doc.content[it] as? OdfContentBlock.Paragraph)?.paragraph }
     val plainText = paras.joinToString("\n") { p -> p.spans.joinToString("") { it.text } }
@@ -155,6 +156,7 @@ fun ContinuousParagraphEditor(
         // caret stays aligned with the displayed text for left/center/right/justified paragraphs.
         BasicTextField(
             value = tfv,
+            readOnly = readOnly,
             onValueChange = onValueChange@{ nv ->
                 val oldText = tfv.text
                 val oldSel = tfv.selection
@@ -165,31 +167,42 @@ fun ContinuousParagraphEditor(
                     nv.text.substring(0, nv.selection.start - 1) + nv.text.substring(nv.selection.start) == oldText
                 if (isEnter) {
                     val newCaret = onEnter(nv.selection.start - 1)
-                    if (newCaret != null) { pendingCaret = newCaret; return@onValueChange }
+                    if (newCaret != null) {
+                        pendingCaret = newCaret; return@onValueChange
+                    }
                 }
                 val isBackspace = nv.selection.collapsed && oldSel.collapsed && nv.text.length == oldText.length - 1 &&
                     oldText.substring(0, nv.selection.start) + oldText.substring(nv.selection.start + 1) == nv.text
                 if (isBackspace) {
                     val newCaret = onBackspace(nv.selection.start + 1)
-                    if (newCaret != null) { pendingCaret = newCaret; return@onValueChange }
+                    if (newCaret != null) {
+                        pendingCaret = newCaret; return@onValueChange
+                    }
                 }
                 val textChanged = nv.text != oldText
                 tfv = nv
                 onSelectionChange(start, endInclusive, nv.selection.min, nv.selection.max)
                 if (textChanged) onTextChange(start, endInclusive, nv.text)
             },
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = onSurface, lineHeight = (22f * fontSizeMultiplier).sp),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                color = onSurface,
+                lineHeight = (22f * fontSizeMultiplier).sp
+            ),
             visualTransformation = transformation,
             onTextLayout = { layout = it },
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            cursorBrush = SolidColor(
+                if (readOnly) Color.Transparent else MaterialTheme.colorScheme.primary,
+            ),
             modifier = Modifier.fillMaxWidth()
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .onPreviewKeyEvent { ev ->
                     // Backspace at the very start of this run deletes the object (image, page break,
                     // table of contents, chart…) sitting just above it.
-                    if (ev.type == KeyEventType.KeyDown && ev.key == Key.Backspace &&
+                    if (!readOnly && ev.type == KeyEventType.KeyDown && ev.key == Key.Backspace &&
                         tfv.selection.collapsed && tfv.selection.start == 0 && start > 0
-                    ) { onDeletePrevBlock(); true } else false
+                    ) {
+                        onDeletePrevBlock(); true
+                    } else false
                 }
                 .onFocusChanged { onFocusChangedCb(it.isFocused) }
         )
@@ -234,7 +247,12 @@ fun ContinuousParagraphEditor(
                             .offset(x = rect.left.toDp(), y = (rect.top - 14f).toDp())
                             .background(color)
                     ) {
-                        Text(rc.name, color = contentColorOn(color), fontSize = 8.sp, modifier = Modifier.padding(horizontal = 2.dp))
+                        Text(
+                            rc.name,
+                            color = contentColorOn(color),
+                            fontSize = 8.sp,
+                            modifier = Modifier.padding(horizontal = 2.dp)
+                        )
                     }
                 }
             }

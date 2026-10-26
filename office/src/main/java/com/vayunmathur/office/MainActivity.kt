@@ -233,7 +233,11 @@ class MainActivity : MaActivity() {
         val editorContent: @Composable () -> Unit = {
             when (val s = state) {
                 is OfficeViewModel.ViewState.Loaded -> DocumentScreen(
-                    document = s.document, viewModel = viewModel, activity = this@MainActivity,
+                    document = s.document,
+                    viewModel = viewModel,
+                    activity = this@MainActivity,
+                    sourceUri = documentUri,
+                    sourceDisplayName = s.document.title,
                     onBack = { onLeaveEditor() },
                 )
 
@@ -320,7 +324,14 @@ fun DocumentScreen(
     viewModel: OfficeViewModel,
     activity: ComponentActivity,
     onBack: () -> Unit,
+    sourceUri: Uri? = null,
+    sourceDisplayName: String? = null,
 ) {
+    val existingOoxml = sourceUri != null && sourceDisplayName
+        ?.substringAfterLast('.', "")
+        ?.lowercase()
+        ?.let { it in OOXML_EXTENSIONS } == true
+    var pageView by remember(sourceUri, sourceDisplayName) { mutableStateOf(existingOoxml) }
     val s = rememberDocumentScreenState()
     val sel = rememberScreenSelection(s)
 
@@ -338,6 +349,9 @@ fun DocumentScreen(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
+    LaunchedEffect(sourceUri) {
+        if (existingOoxml) listState.scrollToItem(0)
+    }
 
     val launchers = rememberDocumentLaunchers(
         viewModel = viewModel,
@@ -349,6 +363,9 @@ fun DocumentScreen(
 
     DocumentDrawerShell(
         s = s,
+        existingOoxml = existingOoxml,
+        pageView = pageView,
+        onTogglePageView = { pageView = !pageView },
         document = document,
         viewModel = viewModel,
         activity = activity,
@@ -380,5 +397,11 @@ fun DocumentScreen(
         onBack = onBack,
     )
 }
+
+private val OOXML_EXTENSIONS = setOf(
+    "docx", "docm", "dotx", "dotm",
+    "xlsx", "xlsm", "xltx", "xltm",
+    "pptx", "pptm", "potx", "potm", "ppsx", "ppsm",
+)
 
 /** Run-selection + shell sections: see DocumentScreenChrome / DocumentScreenShell. */

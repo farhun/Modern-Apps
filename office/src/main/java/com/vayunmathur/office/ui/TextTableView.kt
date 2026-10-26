@@ -51,6 +51,7 @@ internal fun TextTableView(
     fontSizeMultiplier: Float = 1f,
     onCellTextChange: (Int, Int, Int, String) -> Unit = { _, _, _, _ -> },
     onCellFocus: (Int, Int, Int, Int, Int) -> Unit = { _, _, _, _, _ -> },
+    readOnly: Boolean = false,
 ) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     fun colWidthDp(start: Int, span: Int): androidx.compose.ui.unit.Dp {
@@ -96,6 +97,7 @@ internal fun TextTableView(
                                 onCellFocus(blockIndex, r, c, selectionStart, selectionEnd)
                             },
                             onChange = { text -> onCellTextChange(blockIndex, r, c, text) },
+                            readOnly = readOnly,
                         )
                     }
                 }
@@ -117,6 +119,7 @@ private fun EditableTextTableCell(
     onFocus: (Int, Int) -> Unit,
     onSelectionChange: (Int, Int) -> Unit,
     onChange: (String) -> Unit,
+    readOnly: Boolean,
 ) {
     val plain = cell.paragraphs.joinToString("\n") { paragraph ->
         paragraph.spans.joinToString("") { span -> span.text }
@@ -179,6 +182,7 @@ private fun EditableTextTableCell(
     )
     BasicTextField(
         value = textFieldValue,
+        readOnly = readOnly,
         onValueChange = { newValue ->
             val changed = newValue.text != textFieldValue.text
             textFieldValue = newValue
@@ -187,7 +191,9 @@ private fun EditableTextTableCell(
         },
         textStyle = style,
         visualTransformation = transformation,
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        cursorBrush = SolidColor(
+            if (readOnly) Color.Transparent else MaterialTheme.colorScheme.primary,
+        ),
         modifier = Modifier.fillMaxWidth().onFocusChanged { focusState ->
             if (focusState.isFocused) onFocus(textFieldValue.selection.min, textFieldValue.selection.max)
         },

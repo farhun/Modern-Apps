@@ -26,10 +26,12 @@ import com.vayunmathur.library.ui.CircularProgressIndicator
 import com.vayunmathur.library.ui.DrawerState
 import com.vayunmathur.library.ui.IconBack
 import com.vayunmathur.library.ui.IconButton
+import com.vayunmathur.library.ui.IconEdit
 import com.vayunmathur.library.ui.IconRedo
 import com.vayunmathur.library.ui.IconSave
 import com.vayunmathur.library.ui.IconSearch
 import com.vayunmathur.library.ui.IconUndo
+import com.vayunmathur.library.ui.IconVisible
 import com.vayunmathur.library.ui.MaterialTheme
 import com.vayunmathur.library.ui.ModalDrawerSheet
 import com.vayunmathur.library.ui.ModalNavigationDrawer
@@ -101,6 +103,9 @@ internal fun DocumentEffects(
 @Composable
 internal fun DocumentDrawerShell(
     s: DocumentScreenState,
+    existingOoxml: Boolean,
+    pageView: Boolean,
+    onTogglePageView: () -> Unit,
     document: OdfDocument,
     viewModel: OfficeViewModel,
     activity: ComponentActivity,
@@ -122,7 +127,7 @@ internal fun DocumentDrawerShell(
 ) {
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = chrome.isTextDoc &&
+        gesturesEnabled = !pageView && chrome.isTextDoc &&
             (chrome.headings.isNotEmpty() || chrome.bookmarks.isNotEmpty()),
         drawerContent = {
             DrawerOutline(chrome, listState, drawerState, scope)
@@ -130,6 +135,9 @@ internal fun DocumentDrawerShell(
     ) {
         DocumentScaffoldShell(
             s = s,
+            existingOoxml = existingOoxml,
+            pageView = pageView,
+            onTogglePageView = onTogglePageView,
             document = document,
             viewModel = viewModel,
             activity = activity,
@@ -222,6 +230,9 @@ internal fun DrawerScreenOverlays(
 @Composable
 internal fun DocumentScaffoldShell(
     s: DocumentScreenState,
+    existingOoxml: Boolean,
+    pageView: Boolean,
+    onTogglePageView: () -> Unit,
     document: OdfDocument,
     viewModel: OfficeViewModel,
     activity: ComponentActivity,
@@ -257,17 +268,24 @@ internal fun DocumentScaffoldShell(
             }
         },
         actions = {
-            DocumentScaffoldActions(
-                chrome = chrome,
-                viewModel = viewModel,
-                canEdit = chrome.canEdit,
-                saveAsName = chrome.saveAsName,
-                launchers = launchers,
-                onToggleSearch = onToggleSearch,
-            )
+            if (existingOoxml) {
+                IconButton(onClick = onTogglePageView) {
+                    if (pageView) IconEdit() else IconVisible()
+                }
+            }
+            if (!pageView) {
+                DocumentScaffoldActions(
+                    chrome = chrome,
+                    viewModel = viewModel,
+                    canEdit = chrome.canEdit,
+                    saveAsName = chrome.saveAsName,
+                    launchers = launchers,
+                    onToggleSearch = onToggleSearch,
+                )
+            }
         },
         bottomBar = {
-            ScaffoldBottomBar(s, document, viewModel, chrome, launchers, sel)
+            if (!pageView) ScaffoldBottomBar(s, document, viewModel, chrome, launchers, sel)
         },
         scrollBehavior = appBarScrollBehavior(),
     ) { paddingValues ->
@@ -282,6 +300,7 @@ internal fun DocumentScaffoldShell(
             drawerState = drawerState,
             listState = listState,
             contentPadding = paddingValues,
+            pageView = pageView,
             onRunSelectionChange = onRunSelectionChange,
             onCellFocus = onCellFocus,
             onCellSelected = onCellSelected,
@@ -360,6 +379,7 @@ internal fun DocumentScaffoldBody(
     drawerState: com.vayunmathur.library.ui.DrawerState,
     listState: androidx.compose.foundation.lazy.LazyListState,
     contentPadding: androidx.compose.foundation.layout.PaddingValues,
+    pageView: Boolean,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
     onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
@@ -368,27 +388,40 @@ internal fun DocumentScaffoldBody(
     modifier: Modifier = Modifier,
 ) {
     Column(Modifier.fillMaxSize().padding(contentPadding)) {
-        ScaffoldMenuBars(
-            s = s, document = document, viewModel = viewModel,
-            activity = activity, chrome = chrome, launchers = launchers,
-            scope = scope, drawerState = drawerState, listState = listState
-        )
-        // Timer/search/font/word bars: see DocumentFindBars (file-length split).
-        DocumentEditorPane(
-            s = s,
-            document = document,
-            viewModel = viewModel,
-            chrome = chrome,
-            listState = listState,
-            scope = scope,
-            drawerState = drawerState,
-            onRunSelectionChange = onRunSelectionChange,
-            onCellFocus = onCellFocus,
-            onCellSelected = onCellSelected,
-            onSlideChange = onSlideChange,
-            onSlideElementSelected = onSlideElementSelected,
-            modifier = modifier,
-        )
+        if (!pageView) {
+            ScaffoldMenuBars(
+                s = s, document = document, viewModel = viewModel,
+                activity = activity, chrome = chrome, launchers = launchers,
+                scope = scope, drawerState = drawerState, listState = listState
+            )
+        }
+        if (pageView && document is OdfDocument.TextDocument) {
+            com.vayunmathur.office.ui.OfficeDocxPageView(
+                document = document,
+                listState = listState,
+                scope = scope,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            // Timer/search/font/word bars are omitted in Page view; spreadsheet/slide panes
+            // receive read-only mode until their dedicated page layouts are added.
+            DocumentEditorPane(
+                s = s,
+                document = document,
+                viewModel = viewModel,
+                chrome = chrome,
+                listState = listState,
+                scope = scope,
+                drawerState = drawerState,
+                isPageView = pageView,
+                onRunSelectionChange = onRunSelectionChange,
+                onCellFocus = onCellFocus,
+                onCellSelected = onCellSelected,
+                onSlideChange = onSlideChange,
+                onSlideElementSelected = onSlideElementSelected,
+                modifier = modifier,
+            )
+        }
     }
 }
 
@@ -448,6 +481,7 @@ internal fun DocumentEditorPane(
     listState: androidx.compose.foundation.lazy.LazyListState,
     scope: kotlinx.coroutines.CoroutineScope,
     drawerState: com.vayunmathur.library.ui.DrawerState,
+    isPageView: Boolean = false,
     onRunSelectionChange: (Int, Int, Int, Int) -> Unit,
     onCellFocus: (Int, Int, Int, Int, Int) -> Unit,
     onCellSelected: (Int, Int, Int) -> Unit,
@@ -473,7 +507,8 @@ internal fun DocumentEditorPane(
                 document = {
                     EditorDocumentPane(
                         s = s, document = document, viewModel = viewModel, chrome = chrome,
-                        listState = listState, onRunSelectionChange = onRunSelectionChange,
+                        listState = listState, isPageView = isPageView,
+                        onRunSelectionChange = onRunSelectionChange,
                         onCellFocus = onCellFocus, onCellSelected = onCellSelected,
                         onSlideChange = onSlideChange, onSlideElementSelected = onSlideElementSelected,
                         modifier = Modifier.fillMaxSize()
@@ -483,7 +518,8 @@ internal fun DocumentEditorPane(
         } else {
             EditorDocumentPane(
                 s = s, document = document, viewModel = viewModel, chrome = chrome,
-                listState = listState, onRunSelectionChange = onRunSelectionChange,
+                listState = listState, isPageView = isPageView,
+                onRunSelectionChange = onRunSelectionChange,
                 onCellFocus = onCellFocus, onCellSelected = onCellSelected,
                 onSlideChange = onSlideChange, onSlideElementSelected = onSlideElementSelected,
                 modifier = Modifier.fillMaxSize()
@@ -505,6 +541,7 @@ internal fun EditorDocumentPane(
     onCellSelected: (Int, Int, Int) -> Unit,
     onSlideChange: (Int) -> Unit,
     onSlideElementSelected: (Int, Int) -> Unit,
+    isPageView: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val activeSlideEl by s.activeSlideElState
@@ -516,7 +553,7 @@ internal fun EditorDocumentPane(
         searchQuery = s.searchQuery,
         fontSizeMultiplier = s.fontSizeMultiplier,
         listState = listState,
-        isEditMode = chrome.isEditMode,
+        isEditMode = chrome.isEditMode && !isPageView,
         activeSlideEl = activeSlideEl,
         onRunSelectionChange = onRunSelectionChange,
         onCellFocus = onCellFocus,
